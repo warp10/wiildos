@@ -13,6 +13,17 @@ up_to_date = []
 newer_version_available = []
 other=[]
 
+f = open('report.html', 'w+')
+
+
+def print_header():
+    pass
+
+def print_row():
+    pass
+
+def print_footer():
+    pass
 
 for src_pkg in wiildos_src_pkgs_list:
     query = "SELECT DISTINCT ubuntu_sources.source, ubuntu_sources.version, sources.version, upstream.upstream_version, upstream.status FROM ubuntu_sources LEFT OUTER JOIN sources ON ubuntu_sources.source=sources.source LEFT OUTER JOIN upstream ON sources.source=upstream.source WHERE ubuntu_sources.source='" + src_pkg + "' AND ubuntu_sources.release='" + UBUNTU_RELEASE + "' AND sources.release='" + DEBIAN_RELEASE + "';"
@@ -26,3 +37,13 @@ for src_pkg in wiildos_src_pkgs_list:
         else:
             other.append(row)
 
+print_header()
+
+for row in other:
+    print_row()
+for row in newer_version_available:
+    print_row()
+for row in other:
+    print_row()
+
+print_footer()
