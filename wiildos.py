@@ -13,17 +13,29 @@ up_to_date = []
 newer_version_available = []
 other=[]
 
-f = open('report.html', 'w+')
+def write(text, mode):
+    with open('report.html', mode) as f:
+        f.write(text)
 
 
-def print_header():
+def write_header():
+    header =  """<html>
+<head>
+        <title>Wiildos Packages Health Status Monitor</title>
+</head>
+<body>
+        <h1> Wiildos Packages Health Status</h1>"""
+    write(header, 'w+')
+
+def write_row():
     pass
 
-def print_row():
-    pass
-
-def print_footer():
-    pass
+def write_footer():
+    footer="""
+</body>
+</html>
+"""
+    write(footer, 'a')
 
 for src_pkg in wiildos_src_pkgs_list:
     query = "SELECT DISTINCT ubuntu_sources.source, ubuntu_sources.version, sources.version, upstream.upstream_version, upstream.status FROM ubuntu_sources LEFT OUTER JOIN sources ON ubuntu_sources.source=sources.source LEFT OUTER JOIN upstream ON sources.source=upstream.source WHERE ubuntu_sources.source='" + src_pkg + "' AND ubuntu_sources.release='" + UBUNTU_RELEASE + "' AND sources.release='" + DEBIAN_RELEASE + "';"
@@ -37,13 +49,13 @@ for src_pkg in wiildos_src_pkgs_list:
         else:
             other.append(row)
 
-print_header()
+write_header()
 
 for row in other:
-    print_row()
+    write_row()
 for row in newer_version_available:
-    print_row()
+    write_row()
 for row in other:
-    print_row()
+    write_row()
 
-print_footer()
+write_footer()
