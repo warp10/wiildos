@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 import psycopg2
-
+import HTML
 
 wiildos_src_pkgs_list = ('python-whiteboard', 'curtain', 'spotlighter',
                          'ardesia', 'epoptes', 'cellwriter', 'gnome-orca',
@@ -18,7 +18,7 @@ UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
 
 
-def write(text, mode):
+def write_to_file(text, mode):
     with open('report.html', mode) as f:
         f.write(text)
 
@@ -30,11 +30,7 @@ def write_header():
 </head>
 <body>
         <h1> Wiildos Packages Health Status</h1>"""
-    write(header, 'w+')
-
-
-def write_row():
-    pass
+    write_to_file(header, 'w+')
 
 
 def write_footer():
@@ -42,8 +38,15 @@ def write_footer():
 </body>
 </html>
 """
-    write(footer, 'a')
+    write_to_file(footer, 'a')
 
+
+def write_table(title, data):
+    output = "<h1>" + title + "</h1>"
+    output += HTML.table(data)
+    output += ("<p>")
+
+    write_to_file(output, 'a')
 
 if __name__ == "__main__":
     conn = psycopg2.connect("service=udd")
@@ -65,7 +68,7 @@ if __name__ == "__main__":
                  "' AND sources.release='" + DEBIAN_RELEASE + "';"
         cursor.execute(query)
 
-        for row in cursor.fetchall():  #fetchall() returns a list of tuples of strings, one tuple per match
+        for row in cursor.fetchall():  #returns a list of tuples of strings, one tuple per match
             if row[-1] == 'up to date':
                 up_to_date.append(row)
             elif row[-1] == 'Newer version available':
@@ -75,11 +78,8 @@ if __name__ == "__main__":
 
     write_header()
 
-    for row in other:
-        write_row()
-    for row in newer_version_available:
-        write_row()
-    for row in other:
-        write_row()
+    write_table("Other", other)
+    write_table("Newer version available", newer_version_available)
+    write_table("Up to date", up_to_date)
 
     write_footer()
