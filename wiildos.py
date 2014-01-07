@@ -43,14 +43,19 @@ def write_footer():
 
 def write_table(title, data):
     output = "<h1>" + title + "</h1>"
-    output += HTML.table(data,
-                         header_row=['Source package', 'Ubuntu', 'Debian',
-                                     'Upstream', 'Status'])
+    table = HTML.Table(header_row=['Source package', 'Ubuntu', 'Debian',
+                                   'Upstream', 'Status', 'Links'])
+    for item in data:
+        pkg = item[0]
+        ubu_version = item[1]
+        item = list(item)
+        item.append(links_creator(pkg, ubu_version))
+        table.rows.append(item)
+    output += str(table)
     output += ("<p>")
-
     write_to_file(output, 'a')
 
-def links_creator(pkg, version):
+def links_creator(pkg, ubu_version):
     pts_base = "http://packages.qa.debian.org/"
     bts_base = "http://bugs.debian.org/cgi-bin/pkgreport.cgi?src="
     deb_buildd_base = "https://buildd.debian.org/status/logs.php?arch=&pkg="
@@ -65,9 +70,9 @@ def links_creator(pkg, version):
     puc = HTML.link('Ubuntu packages.u.c.', puc_base + pkg)
     lp = HTML.link('Ubuntu LP', lp_base + pkg)
     ubu_bugs = HTML.link('Ubuntu Bugs', ubu_bugs_base % pkg)
-    ubu_buildd = HTML.link('Ubuntu buildd', ubu_buildd_base % (pkg, version))
+    ubu_buildd = HTML.link('Ubuntu buildd', ubu_buildd_base % (pkg, ubu_version))
 
-    return pts, bts, deb_buildd, puc, lp, ubu_bugs, ubu_buildd
+    return " ".join((pts, bts, deb_buildd, puc, lp, ubu_bugs, ubu_buildd))
 
 
 if __name__ == "__main__":
