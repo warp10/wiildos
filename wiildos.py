@@ -3,7 +3,7 @@
 import psycopg2
 import HTML
 
-wiildos_src_pkgs_list = ('python-whiteboard', 'curtain', 'spotlighter',
+WIILDOS_SRC_PKGS_LIST = ('python-whiteboard', 'curtain', 'spotlighter',
                          'ardesia', 'epoptes', 'cellwriter', 'gnome-orca',
                          'gpicview', 'xournal', 'dia', 'inkscape', 'librecad',
                          'pinta', 'scribus', 'geany', 'scratch', 'kicad',
@@ -16,10 +16,10 @@ wiildos_src_pkgs_list = ('python-whiteboard', 'curtain', 'spotlighter',
                          'florence')
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
-
+REPORT = "report.html"
 
 def write_to_file(text, mode):
-    with open('report.html', mode) as f:
+    with open(REPORT, mode) as f:
         f.write(text)
 
 
@@ -43,7 +43,9 @@ def write_footer():
 
 def write_table(title, data):
     output = "<h1>" + title + "</h1>"
-    output += HTML.table(data)
+    output += HTML.table(data,
+                         header_row=['Source package', 'Ubuntu', 'Debian',
+                                     'Upstream', 'Status'])
     output += ("<p>")
 
     write_to_file(output, 'a')
@@ -56,7 +58,7 @@ if __name__ == "__main__":
     newer_version_available = []
     other=[]
 
-    for src_pkg in wiildos_src_pkgs_list:
+    for src_pkg in WIILDOS_SRC_PKGS_LIST:
         query = "SELECT DISTINCT ubuntu_sources.source, \
                  ubuntu_sources.version, sources.version, \
                  upstream.upstream_version, upstream.status \
