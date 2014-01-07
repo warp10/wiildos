@@ -50,6 +50,26 @@ def write_table(title, data):
 
     write_to_file(output, 'a')
 
+def links_creator(pkg, version):
+    pts_base = "http://packages.qa.debian.org/"
+    bts_base = "http://bugs.debian.org/cgi-bin/pkgreport.cgi?src="
+    deb_buildd_base = "https://buildd.debian.org/status/logs.php?arch=&pkg="
+    puc_base = "http://packages.ubuntu.com/search?searchon=sourcenames&keywords="
+    lp_base = "https://launchpad.net/ubuntu/+source/"
+    ubu_bugs_base = "https://launchpad.net/ubuntu/+source/%s/+bugs"
+    ubu_buildd_base = "https://launchpad.net/ubuntu/+source/%s/%s"
+
+    pts = HTML.link('Debian PTS', pts_base + pkg)
+    bts = HTML.link('Debian BTS', bts_base + pkg)
+    deb_buildd = HTML.link('Debian buildd', deb_buildd_base + pkg)
+    puc = HTML.link('Ubuntu packages.u.c.', puc_base + pkg)
+    lp = HTML.link('Ubuntu LP', lp_base + pkg)
+    ubu_bugs = HTML.link('Ubuntu Bugs', ubu_bugs_base % pkg)
+    ubu_buildd = HTML.link('Ubuntu buildd', ubu_buildd_base % (pkg, version))
+
+    return pts, bts, deb_buildd, puc, lp, ubu_bugs, ubu_buildd
+
+
 if __name__ == "__main__":
     conn = psycopg2.connect("service=udd")
     cursor = conn.cursor()
@@ -80,8 +100,8 @@ if __name__ == "__main__":
 
     write_header()
 
-    write_table("Other", other)
-    write_table("Newer version available", newer_version_available)
-    write_table("Up to date", up_to_date)
+    write_table("Packages with issues:", other)
+    write_table("Newer upstream version available:", newer_version_available)
+    write_table("Upstream up to date:", up_to_date)
 
     write_footer()
