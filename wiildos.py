@@ -16,7 +16,7 @@ WIILDOS_SRC_PKGS_LIST = ('python-whiteboard', 'curtain', 'spotlighter',
                          'florence')
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
-REPORT = "report.html"
+REPORT = "/home/groups/ubuntu-dev/htdocs/ubuntu-it/report.html"
 
 def write_to_file(text, mode):
     with open(REPORT, mode) as f:
@@ -44,35 +44,44 @@ def write_footer():
 def write_table(title, data):
     output = "<h1>" + title + "</h1>"
     table = HTML.Table(header_row=['Source package', 'Ubuntu', 'Debian',
-                                   'Upstream', 'Status', 'Links'])
+                                   'Upstream', 'Status', 'Debian Links',
+                                   'Ubuntu Links'])
     for item in data:
         pkg = item[0]
-        ubu_version = item[1]
+        version = item[1]
         item = list(item)
-        item.append(links_creator(pkg, ubu_version))
+        item.append(debian_links_creator(pkg, version))
+        item.append(ubuntu_links_creator(pkg, version))
         table.rows.append(item)
     output += str(table)
     output += ("<p>")
     write_to_file(output, 'a')
 
-def links_creator(pkg, ubu_version):
+
+def debian_links_creator(pkg, version):
     pts_base = "http://packages.qa.debian.org/"
     bts_base = "http://bugs.debian.org/cgi-bin/pkgreport.cgi?src="
     deb_buildd_base = "https://buildd.debian.org/status/logs.php?arch=&pkg="
+
+    pts = HTML.link('PTS', pts_base + pkg)
+    bts = HTML.link('BTS', bts_base + pkg)
+    deb_buildd = HTML.link('Buildd', deb_buildd_base + pkg)
+
+    return " ".join((pts, bts, deb_buildd))
+
+
+def ubuntu_links_creator(pkg, version):
     puc_base = "http://packages.ubuntu.com/search?searchon=sourcenames&keywords="
     lp_base = "https://launchpad.net/ubuntu/+source/"
     ubu_bugs_base = "https://launchpad.net/ubuntu/+source/%s/+bugs"
     ubu_buildd_base = "https://launchpad.net/ubuntu/+source/%s/%s"
 
-    pts = HTML.link('Debian PTS', pts_base + pkg)
-    bts = HTML.link('Debian BTS', bts_base + pkg)
-    deb_buildd = HTML.link('Debian buildd', deb_buildd_base + pkg)
-    puc = HTML.link('Ubuntu packages.u.c.', puc_base + pkg)
-    lp = HTML.link('Ubuntu LP', lp_base + pkg)
-    ubu_bugs = HTML.link('Ubuntu Bugs', ubu_bugs_base % pkg)
-    ubu_buildd = HTML.link('Ubuntu buildd', ubu_buildd_base % (pkg, ubu_version))
+    puc = HTML.link('packages.u.c.', puc_base + pkg)
+    lp = HTML.link('LP', lp_base + pkg)
+    ubu_bugs = HTML.link('Bugs', ubu_bugs_base % pkg)
+    ubu_buildd = HTML.link('Buildd', ubu_buildd_base % (pkg, version))
 
-    return " ".join((pts, bts, deb_buildd, puc, lp, ubu_bugs, ubu_buildd))
+    return " ".join((puc, lp, ubu_bugs, ubu_buildd))
 
 
 if __name__ == "__main__":
