@@ -18,7 +18,7 @@ WIILDOS_SRC_PKGS_LIST = ('python-whiteboard', 'curtain', 'spotlighter',
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
 REPORT = "/home/groups/ubuntu-dev/htdocs/ubuntu-it/report.html"
-TIMESTAMP = datetime.datetime.now().strftime("%A, %d %B %Y, %H:%M")
+TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
 
 
 def write_to_file(text, mode):
@@ -47,18 +47,22 @@ def write_footer():
     write_to_file(footer, 'a')
 
 
+def make_row(item):
+    pkg = item[0]
+    version = item[1]
+    item = list(item)
+    item.append(debian_links_creator(pkg, version))
+    item.append(ubuntu_links_creator(pkg, version))
+    return item
+
+
 def write_table(title, data):
     output = "<h1>" + title + "</h1>"
     table = HTML.Table(header_row=['Source package', 'Ubuntu', 'Debian',
                                    'Upstream', 'Status', 'Debian Links',
                                    'Ubuntu Links'])
     for item in data:
-        pkg = item[0]
-        version = item[1]
-        item = list(item)
-        item.append(debian_links_creator(pkg, version))
-        item.append(ubuntu_links_creator(pkg, version))
-        table.rows.append(item)
+        table.rows.append(make_row(item))
     output += str(table)
     output += ("<p>")
     write_to_file(output, 'a')
