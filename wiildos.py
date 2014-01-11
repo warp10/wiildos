@@ -1,6 +1,7 @@
 #!/usr/bin/python
 
 import psycopg2
+import datetime
 import HTML
 
 WIILDOS_SRC_PKGS_LIST = ('python-whiteboard', 'curtain', 'spotlighter',
@@ -17,6 +18,8 @@ WIILDOS_SRC_PKGS_LIST = ('python-whiteboard', 'curtain', 'spotlighter',
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
 REPORT = "/home/groups/ubuntu-dev/htdocs/ubuntu-it/report.html"
+TIMESTAMP = datetime.datetime.now().strftime("%A, %d %B %Y, %H:%M")
+
 
 def write_to_file(text, mode):
     with open(REPORT, mode) as f:
@@ -24,12 +27,15 @@ def write_to_file(text, mode):
 
 
 def write_header():
-    header =  """<html>
+    header =  """<!DOCTYPE html>
+<html>
 <head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
         <title>Wiildos Packages Health Status Monitor</title>
 </head>
 <body>
-        <h1> Wiildos Packages Health Status</h1>"""
+        <h1> Wiildos Packages Health Status</h1>
+        <p> Report generated: <b>%s</b></p>""" % TIMESTAMP
     write_to_file(header, 'w+')
 
 
