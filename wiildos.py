@@ -1,8 +1,19 @@
 #!/usr/bin/python
+#
+# Wiildos Packages Health Status Report Generator
+#
+# Copyright © 2013-2014 Andrea Colangelo <warp10@debian.org
+#
+# This work is free. You can redistribute it and/or modify it under the
+# terms of the Do What The Fuck You Want To Public License, Version 2,
+# as published by Sam Hocevar. The full text of the license is available at:
+# http://www.wtfpl.net/txt/copying/
+
 
 import psycopg2
 import datetime
 import HTML
+
 
 WIILDOS_SRC_PKGS_LIST = ('python-whiteboard', 'curtain', 'spotlighter',
                          'ardesia', 'epoptes', 'cellwriter', 'gnome-orca',
@@ -27,7 +38,7 @@ def write_to_file(text, mode):
 
 
 def write_header():
-    header =  """<!DOCTYPE html>
+    header = """<!DOCTYPE html>
 <html>
 <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
@@ -40,7 +51,7 @@ def write_header():
 
 
 def write_footer():
-    footer="""
+    footer = """
 </body>
 </html>
 """
@@ -100,7 +111,7 @@ if __name__ == "__main__":
 
     up_to_date = []
     newer_version_available = []
-    other=[]
+    other = []
 
     for src_pkg in WIILDOS_SRC_PKGS_LIST:
         query = "SELECT DISTINCT ubuntu_sources.source, \
@@ -114,7 +125,7 @@ if __name__ == "__main__":
                  "' AND sources.release='" + DEBIAN_RELEASE + "';"
         cursor.execute(query)
 
-        for row in cursor.fetchall():  #returns a list of tuples of strings, one tuple per match
+        for row in cursor.fetchall():  # returns a list of tuples of strings, one tuple per match
             if row[-1] == 'up to date':
                 up_to_date.append(row)
             elif row[-1] == 'Newer version available':
