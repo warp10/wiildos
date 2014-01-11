@@ -1,8 +1,9 @@
 #!/usr/bin/python
+# -*- coding: utf-8 -*-
 #
 # Wiildos Packages Health Status Report Generator
 #
-# Copyright © 2013-2014 Andrea Colangelo <warp10@debian.org
+# Copyright © 2013-2014 Andrea Colangelo <warp10@debian.org>
 #
 # This work is free. You can redistribute it and/or modify it under the
 # terms of the Do What The Fuck You Want To Public License, Version 2,
@@ -32,53 +33,6 @@ REPORT = "/home/groups/ubuntu-dev/htdocs/ubuntu-it/report.html"
 TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
 
 
-def write_to_file(text, mode):
-    with open(REPORT, mode) as f:
-        f.write(text)
-
-
-def write_header():
-    header = """<!DOCTYPE html>
-<html>
-<head>
-        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-        <title>Wiildos Packages Health Status Monitor</title>
-</head>
-<body>
-        <h1> Wiildos Packages Health Status</h1>
-        <p> Report generated: <b>%s</b></p>""" % TIMESTAMP
-    write_to_file(header, 'w+')
-
-
-def write_footer():
-    footer = """
-</body>
-</html>
-"""
-    write_to_file(footer, 'a')
-
-
-def make_row(item):
-    pkg = item[0]
-    version = item[1]
-    item = list(item)
-    item.append(debian_links_creator(pkg, version))
-    item.append(ubuntu_links_creator(pkg, version))
-    return item
-
-
-def write_table(title, data):
-    output = "<h1>" + title + "</h1>"
-    table = HTML.Table(header_row=['Source package', 'Ubuntu', 'Debian',
-                                   'Upstream', 'Status', 'Debian Links',
-                                   'Ubuntu Links'])
-    for item in data:
-        table.rows.append(make_row(item))
-    output += str(table)
-    output += ("<p>")
-    write_to_file(output, 'a')
-
-
 def debian_links_creator(pkg, version):
     pts_base = "http://packages.qa.debian.org/"
     bts_base = "http://bugs.debian.org/cgi-bin/pkgreport.cgi?src="
@@ -103,6 +57,57 @@ def ubuntu_links_creator(pkg, version):
     ubu_buildd = HTML.link('Buildd', ubu_buildd_base % (pkg, version))
 
     return " ".join((puc, lp, ubu_bugs, ubu_buildd))
+
+
+def write_header():
+    header = """<!DOCTYPE html>
+<html>
+<head>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
+        <title>Wiildos Packages Health Status Monitor</title>
+</head>
+<body>
+        <h1> Wiildos Packages Health Status</h1>
+        <p> Report generated: <b>%s</b></p>""" % TIMESTAMP
+    write_to_file(header, 'w+')
+
+
+def write_footer():
+    footer = """</br>
+<p> Wiildos Packages Health Status Report Generator is Copyright © 2013-2014 \
+Andrea Colangelo <warp10@debian.org></br>
+<a href="http://ubuntu-dev.alioth.debian.org/ubuntu-it/wiildos.py"> \
+Source code</a> is available, patches are welcome.
+</body>
+</html>
+"""
+    write_to_file(footer, 'a')
+
+
+def write_to_file(text, mode):
+    with open(REPORT, mode) as f:
+        f.write(text)
+
+
+def write_table(title, data):
+    output = "<h1>" + title + "</h1>"
+    table = HTML.Table(header_row=['Source package', 'Ubuntu', 'Debian',
+                                   'Upstream', 'Status', 'Debian Links',
+                                   'Ubuntu Links'])
+    for item in data:
+        table.rows.append(make_row(item))
+    output += str(table)
+    output += ("<p>")
+    write_to_file(output, 'a')
+
+
+def make_row(item):
+    pkg = item[0]
+    version = item[1]
+    item = list(item)
+    item.append(debian_links_creator(pkg, version))
+    item.append(ubuntu_links_creator(pkg, version))
+    return item
 
 
 if __name__ == "__main__":
