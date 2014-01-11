@@ -102,9 +102,12 @@ def write_table(title, data):
 
 
 def make_row(item):
+    item = list(item)
+    homepage = item.pop(0) #FIXME: crap, use a dictionary instead?
     pkg = item[0]
     version = item[1]
-    item = list(item)
+    if homepage:
+        item[0] = """<a href="%s">%s</a>""" % (homepage, pkg)
     item.append(debian_links_creator(pkg, version))
     item.append(ubuntu_links_creator(pkg, version))
     return item
@@ -119,7 +122,7 @@ if __name__ == "__main__":
     other = []
 
     for src_pkg in WIILDOS_SRC_PKGS_LIST:
-        query = "SELECT DISTINCT ubuntu_sources.source, \
+        query = "SELECT DISTINCT sources.homepage, ubuntu_sources.source, \
                  ubuntu_sources.version, sources.version, \
                  upstream.upstream_version, upstream.status \
                  FROM ubuntu_sources LEFT OUTER JOIN sources \
