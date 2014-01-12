@@ -33,7 +33,7 @@ REPORT = "/home/groups/ubuntu-dev/htdocs/ubuntu-it/report.html"
 TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
 
 
-def debian_links_creator(pkg, version):
+def make_debian_links(pkg, version):
     pts_base = "http://packages.qa.debian.org/"
     bts_base = "http://bugs.debian.org/cgi-bin/pkgreport.cgi?src="
     deb_buildd_base = "https://buildd.debian.org/status/logs.php?arch=&pkg="
@@ -45,7 +45,7 @@ def debian_links_creator(pkg, version):
     return " ".join((pts, bts, deb_buildd))
 
 
-def ubuntu_links_creator(pkg, version):
+def make_ubuntu_links(pkg, version):
     puc_base = "http://packages.ubuntu.com/search?searchon=sourcenames&keywords="
     lp_base = "https://launchpad.net/ubuntu/+source/"
     ubu_bugs_base = "https://launchpad.net/ubuntu/+source/%s/+bugs"
@@ -108,8 +108,8 @@ def make_row(item):
     version = item[1]
     if homepage:
         item[0] = """<a href="%s">%s</a>""" % (homepage, pkg)
-    item.append(debian_links_creator(pkg, version))
-    item.append(ubuntu_links_creator(pkg, version))
+    item.append(make_debian_links(pkg, version))
+    item.append(make_ubuntu_links(pkg, version))
     return item
 
 
