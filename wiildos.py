@@ -10,35 +10,6 @@
 # as published by Sam Hocevar. The full text of the license is available at:
 # http://www.wtfpl.net/txt/copying/
 
-"""
-TODO PACKAGES:
-- sankore: http://open-sankore.org/,  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=673322, Contatto: Claudio Valerio <claudio@open-sankore.org>
-- eviacam: http://eviacam.sourceforge.net/index.php
-- easystroke: http://easystroke.sourceforge.net/
-- pencil: http://www.pencil-animation.org/
-- wiidynamic:
-- omnitux: http://omnitux.sourceforge.net/
-- gspeech: https://github.com/tuxmouraille/MesApps
-- vue: http://vue.tufts.edu/
-- educazionik
-- vox launcher: http://code.google.com/p/vox-launcher/
-"""
-"""
-OTHER PACKAGES:
-- dasher: bugged, many deps, http://ftp.gnome.org/pub/GNOME/sources/dasher/
-- wiican: RM, https://launchpad.net/wiican
-- simple-scan: not considered for inclusion, https://launchpad.net/simple-scan
-- homebank: not considered for inclusion, http://homebank.free.fr/
-- gvb: not considered for inclusion, http://www.pietrobattiston.it
-- gbrainy: not considered for inclusion,  https://live.gnome.org/gbrainy
-- virtual magnifying glass: obsoleted by gnome-orca, http://magnifier.sourceforge.net/
-- xfce4-screenshooter: http://goodies.xfce.org/projects/applications/xfce4-screenshooter
-- drawswf: http://drawswf.sourceforge.net/
-- pydinamic: https://bitbucket.org/zambu/pywiimote
-- osp-tracker: http://www.cabrillo.edu/~dbrown/tracker/
-- xuggler: http://www.xuggle.com/xuggler
-- gtk-recordmydesktop: http://recordmydesktop.sourceforge.net/about.php
-"""
 
 import psycopg2
 import datetime
@@ -46,17 +17,39 @@ from subprocess import call
 import HTML
 
 
-WIILDOS_SRC_PKGS_LIST = ('python-whiteboard', 'curtain', 'spotlighter',
-                         'ardesia', 'epoptes', 'cellwriter', 'gnome-orca',
-                         'gpicview', 'xournal', 'dia', 'inkscape', 'librecad',
-                         'pinta', 'scribus', 'geany', 'scratch', 'kicad',
-                         'osmo', 'pdfmod', 'freeplane', 'fbreader',
-                         'ocrfeeder', 'tuxpaint', 'collatinus', 'geogebra',
-                         'tuxmath', 'wxmaxima', 'lybniz', 'celestia',
-                         'chemtool', 'gperiodic', 'stellarium',
-                         'gnome-chemistry-utils', 'gcompris', 'jclic',
-                         'numptyphysics', 'pingus', 'musescore', 'marble',
-                         'florence')
+TODO_PACKAGES = [
+"sankore, http://open-sankore.org/, http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=673322, Contatto: Claudio Valerio &lt;claudio@open-sankore.org&gt;",
+"eviacam, http://eviacam.sourceforge.net/index.php",
+"easystroke, http://easystroke.sourceforge.net/",
+"pencil, http://www.pencil-animation.org/",
+"wiidynamic",
+"omnitux, http://omnitux.sourceforge.net/",
+"gspeech, https://github.com/tuxmouraille/MesApps",
+"vue, http://vue.tufts.edu/",
+"educazionik",
+"vox launcher, http://code.google.com/p/vox-launcher/"]
+OTHER_PACKAGES = [
+"dasher: bugged, many deps, http://ftp.gnome.org/pub/GNOME/sources/dasher/",
+"wiican: RM, https://launchpad.net/wiican",
+"simple-scan: not considered for inclusion, https://launchpad.net/simple-scan",
+"homebank: not considered for inclusion, http://homebank.free.fr/",
+"gvb: not considered for inclusion, http://www.pietrobattiston.it",
+"gbrainy: not considered for inclusion,  https://live.gnome.org/gbrainy",
+"virtual magnifying glass: obsoleted by gnome-orca, http://magnifier.sourceforge.net/",
+"xfce4-screenshooter: http://goodies.xfce.org/projects/applications/xfce4-screenshooter",
+"drawswf: http://drawswf.sourceforge.net/",
+"pydinamic: https://bitbucket.org/zambu/pywiimote",
+"osp-tracker: http://www.cabrillo.edu/~dbrown/tracker/",
+"xuggler: http://www.xuggle.com/xuggler",
+"gtk-recordmydesktop: http://recordmydesktop.sourceforge.net/about.php",]
+WIILDOS_SRC_PKGS_LIST = (
+'python-whiteboard', 'curtain', 'spotlighter', 'ardesia', 'epoptes',
+'cellwriter', 'gnome-orca', 'gpicview', 'xournal', 'dia', 'inkscape',
+'librecad', 'pinta', 'scribus', 'geany', 'scratch', 'kicad', 'osmo', 'pdfmod',
+'freeplane', 'fbreader', 'ocrfeeder', 'tuxpaint', 'collatinus', 'geogebra',
+'tuxmath', 'wxmaxima', 'lybniz', 'celestia', 'chemtool', 'gperiodic',
+'stellarium', 'gnome-chemistry-utils', 'gcompris', 'jclic', 'numptyphysics',
+'pingus', 'musescore', 'marble', 'florence')
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
 REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report.html"
@@ -103,8 +96,11 @@ def write_header():
         <title>iildos Packages Health Status Report</title>
 </head>
 <body>
-        <h1><center>Wiildos Packages Health Status</center></h1>
-        <p> Report generated on: <b>%s</b></p>""" % TIMESTAMP
+        <center><h1>Wiildos Packages Health Status</h1></center>
+        <p> Report generated on: <b>%s</b><br>
+        Ubuntu target release is: <b>%s</b><br>
+        Debian target release is: <b>%s</b></p>
+        """ % (TIMESTAMP, UBUNTU_RELEASE, DEBIAN_RELEASE)
     write_to_file(header, 'w+')
 
 
@@ -131,6 +127,12 @@ def write_legend():
     t.rows.append(HTML.TableRow(("Ubuntu version matches Debian version", ),
                                 bgcolor=UBU_EQ_DEB_COLOR))
     write_to_file(str(t) + "<br>", 'a')
+
+
+def write_note(title, data):
+    output = "<h2>%s</h2>" % title
+    output += HTML.list(data)
+    write_to_file(output, 'a')
 
 
 def write_to_file(text, mode):
@@ -211,4 +213,6 @@ if __name__ == "__main__":
     write_table("Packages with issues:", other)
     write_table("Newer upstream version available:", newer_version_available)
     write_table("Upstream up to date:", up_to_date)
+    write_note("Packages to be packaged and uploaded to archive:", TODO_PACKAGES)
+    write_note("Packages not considered for inclusion in wiildos:", OTHER_PACKAGES)
     write_footer()
