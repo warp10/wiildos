@@ -108,6 +108,10 @@ def make_row(item):
     ubu_links = make_ubuntu_links(source, ubu_version)
     if homepage:
         source= """<a href="%s">%s</a>""" % (homepage, source)
+    if upstream_version is "None":
+        upstream_version = ""
+    if upstream_status is "None":
+        upstream_status = ""
     return source, ubu_version, deb_version, upstream_version, \
            upstream_status, deb_links, ubu_links
 
