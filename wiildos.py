@@ -10,24 +10,6 @@
 # as published by Sam Hocevar. The full text of the license is available at:
 # http://www.wtfpl.net/txt/copying/
 
-
-import psycopg2
-import datetime
-from subprocess import call
-import HTML
-
-
-WIILDOS_SRC_PKGS_LIST = ('python-whiteboard', 'curtain', 'spotlighter',
-                         'ardesia', 'epoptes', 'cellwriter', 'gnome-orca',
-                         'gpicview', 'xournal', 'dia', 'inkscape', 'librecad',
-                         'pinta', 'scribus', 'geany', 'scratch', 'kicad',
-                         'osmo', 'pdfmod', 'freeplane', 'fbreader',
-                         'ocrfeeder', 'tuxpaint', 'collatinus', 'geogebra',
-                         'tuxmath', 'wxmaxima', 'lybniz', 'celestia',
-                         'chemtool', 'gperiodic', 'stellarium',
-                         'gnome-chemistry-utils', 'gcompris', 'jclic',
-                         'numptyphysics', 'pingus', 'musescore', 'marble',
-                         'florence')
 """
 TODO PACKAGES:
 - sankore: http://open-sankore.org/,  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=673322, Contatto: Claudio Valerio <claudio@open-sankore.org>
@@ -57,9 +39,27 @@ OTHER PACKAGES:
 - xuggler: http://www.xuggle.com/xuggler
 - gtk-recordmydesktop: http://recordmydesktop.sourceforge.net/about.php
 """
+
+import psycopg2
+import datetime
+from subprocess import call
+import HTML
+
+
+WIILDOS_SRC_PKGS_LIST = ('python-whiteboard', 'curtain', 'spotlighter',
+                         'ardesia', 'epoptes', 'cellwriter', 'gnome-orca',
+                         'gpicview', 'xournal', 'dia', 'inkscape', 'librecad',
+                         'pinta', 'scribus', 'geany', 'scratch', 'kicad',
+                         'osmo', 'pdfmod', 'freeplane', 'fbreader',
+                         'ocrfeeder', 'tuxpaint', 'collatinus', 'geogebra',
+                         'tuxmath', 'wxmaxima', 'lybniz', 'celestia',
+                         'chemtool', 'gperiodic', 'stellarium',
+                         'gnome-chemistry-utils', 'gcompris', 'jclic',
+                         'numptyphysics', 'pingus', 'musescore', 'marble',
+                         'florence')
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
-REPORT = "/home/groups/ubuntu-dev/htdocs/ubuntu-it/report.html"
+REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report.html"
 TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
 UBU_LT_DEB_COLOR = "FF4444"  # light red
 UBU_GT_DEB_COLOR = "6571DE"  # light blue
@@ -113,7 +113,7 @@ def write_footer():
     footer = """<br>
 <p> Wiildos Packages Health Status Report Generator is Copyright © 2013-2014 \
 Andrea Colangelo &lt;warp10@debian.org&gt;<br>
-<a href="http://ubuntu-dev.alioth.debian.org/ubuntu-it/wiildos.py"> \
+<a href="http://ubuntu-dev.alioth.debian.org/wiildos/wiildos.py"> \
 Source code</a> is available, patches are welcome.
 </body>
 </html>
