@@ -13,6 +13,7 @@
 
 import psycopg2
 import datetime
+from subprocess import call
 import HTML
 
 
@@ -118,8 +119,14 @@ def make_row(item):
     ubu_links = make_ubuntu_links(source, ubu_version)
     if homepage:
         source = """<a href="%s">%s</a>""" % (homepage, source)
-    return source, ubu_version, deb_version, upstream_version, \
-        upstream_status, deb_links, ubu_links
+    if not call(["dpkg", "--compare-versions", ubu_version, "gt", deb_version]):
+        bgcolor = "FF4444" #light red
+    elif not call(["dpkg", "--compare-versions", ubu_version, "lt", deb_version]):
+        bgcolor = "6571DE" #light blue
+    else:
+        bgcolor = "white"
+    return HTML.TableRow((source, ubu_version, deb_version, upstream_version, \
+        upstream_status, deb_links, ubu_links), bgcolor)
 
 
 if __name__ == "__main__":
