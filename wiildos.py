@@ -100,11 +100,11 @@ def write_header():
 <html>
 <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-        <title>Wiildos Packages Health Status Monitor</title>
+        <title>iildos Packages Health Status Report</title>
 </head>
 <body>
-        <h1> Wiildos Packages Health Status</h1>
-        <p> Report generated: <b>%s</b></p>""" % TIMESTAMP
+        <h1><center>Wiildos Packages Health Status</center></h1>
+        <p> Report generated on: <b>%s</b></p>""" % TIMESTAMP
     write_to_file(header, 'w+')
 
 
@@ -112,7 +112,8 @@ def write_footer():
     """Write the footer header to file"""
     footer = """<br>
 <p> Wiildos Packages Health Status Report Generator is Copyright © 2013-2014 \
-Andrea Colangelo &lt;warp10@debian.org&gt;<br>
+Andrea Colangelo &lt;warp10@debian.org&gt; and is released under the terms of \
+the <a href="http://www.wtfpl.net/">WTFPL</a><br>
 <a href="https://github.com/warp10/wiildos"> \
 Source code</a> is available, patches are welcome.
 </body>
