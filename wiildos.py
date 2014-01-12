@@ -106,7 +106,7 @@ def make_row(item):
         exec("%s = '%s'" % (key, value))
     deb_links = make_debian_links(source, deb_version)
     ubu_links = make_ubuntu_links(source, ubu_version)
-    if homepage:
+    if homepage is not "None":
         source= """<a href="%s">%s</a>""" % (homepage, source)
     if upstream_version is "None":
         upstream_version = ""
