@@ -113,7 +113,7 @@ def write_footer():
     footer = """<br>
 <p> Wiildos Packages Health Status Report Generator is Copyright © 2013-2014 \
 Andrea Colangelo &lt;warp10@debian.org&gt;<br>
-<a href="http://ubuntu-dev.alioth.debian.org/wiildos/wiildos.py"> \
+<a href="https://github.com/warp10/wiildos"> \
 Source code</a> is available, patches are welcome.
 </body>
 </html>
