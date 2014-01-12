@@ -28,6 +28,35 @@ WIILDOS_SRC_PKGS_LIST = ('python-whiteboard', 'curtain', 'spotlighter',
                          'gnome-chemistry-utils', 'gcompris', 'jclic',
                          'numptyphysics', 'pingus', 'musescore', 'marble',
                          'florence')
+"""
+TODO PACKAGES:
+- sankore: http://open-sankore.org/,  http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=673322, Contatto: Claudio Valerio <claudio@open-sankore.org>
+- eviacam: http://eviacam.sourceforge.net/index.php
+- easystroke: http://easystroke.sourceforge.net/
+- pencil: http://www.pencil-animation.org/
+- wiidynamic:
+- omnitux: http://omnitux.sourceforge.net/
+- gspeech: https://github.com/tuxmouraille/MesApps
+- vue: http://vue.tufts.edu/
+- educazionik
+- vox launcher: http://code.google.com/p/vox-launcher/
+"""
+"""
+OTHER PACKAGES:
+- dasher: bugged, many deps, http://ftp.gnome.org/pub/GNOME/sources/dasher/
+- wiican: RM, https://launchpad.net/wiican
+- simple-scan: not considered for inclusion, https://launchpad.net/simple-scan
+- homebank: not considered for inclusion, http://homebank.free.fr/
+- gvb: not considered for inclusion, http://www.pietrobattiston.it
+- gbrainy: not considered for inclusion,  https://live.gnome.org/gbrainy
+- virtual magnifying glass: obsoleted by gnome-orca, http://magnifier.sourceforge.net/
+- xfce4-screenshooter: http://goodies.xfce.org/projects/applications/xfce4-screenshooter
+- drawswf: http://drawswf.sourceforge.net/
+- pydinamic: https://bitbucket.org/zambu/pywiimote
+- osp-tracker: http://www.cabrillo.edu/~dbrown/tracker/
+- xuggler: http://www.xuggle.com/xuggler
+- gtk-recordmydesktop: http://recordmydesktop.sourceforge.net/about.php
+"""
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
 REPORT = "/home/groups/ubuntu-dev/htdocs/ubuntu-it/report.html"
