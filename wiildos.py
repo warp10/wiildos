@@ -102,15 +102,14 @@ def write_table(title, data):
 
 
 def make_row(item):
-    item = list(item)
-    homepage = item.pop(0) #FIXME: crap, use a dictionary instead?
-    pkg = item[0]
-    version = item[1]
+    for key, value in item.items():
+        exec("%s = '%s'" % (key, value))
+    deb_links = make_debian_links(source, deb_version)
+    ubu_links = make_ubuntu_links(source, ubu_version)
     if homepage:
-        item[0] = """<a href="%s">%s</a>""" % (homepage, pkg)
-    item.append(make_debian_links(pkg, version))
-    item.append(make_ubuntu_links(pkg, version))
-    return item
+        source= """<a href="%s">%s</a>""" % (homepage, source)
+    return source, ubu_version, deb_version, upstream_version, \
+           upstream_status, deb_links, ubu_links
 
 
 if __name__ == "__main__":
@@ -133,13 +132,16 @@ if __name__ == "__main__":
                  "' AND sources.release='" + DEBIAN_RELEASE + "';"
         cursor.execute(query)
 
+        keys = ["homepage", "source", "ubu_version", "deb_version",
+                "upstream_version", "upstream_status"]
         for row in cursor.fetchall():  # returns a list of tuples of strings, one tuple per match
-            if row[-1] == 'up to date':
-                up_to_date.append(row)
-            elif row[-1] == 'Newer version available':
-                newer_version_available.append(row)
+            item = dict(zip(keys, row))
+            if item["upstream_status"] == 'up to date':
+                up_to_date.append(item)
+            elif item["upstream_status"] == 'Newer version available':
+                newer_version_available.append(item)
             else:
-                other.append(row)
+                other.append(item)
 
     write_header()
 
