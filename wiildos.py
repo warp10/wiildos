@@ -34,6 +34,7 @@ TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
 
 
 def make_debian_links(pkg, version):
+    """Return a string containing debian links for a package"""
     pts_base = "http://packages.qa.debian.org/"
     bts_base = "http://bugs.debian.org/cgi-bin/pkgreport.cgi?src="
     deb_buildd_base = "https://buildd.debian.org/status/logs.php?arch=&pkg="
@@ -46,6 +47,7 @@ def make_debian_links(pkg, version):
 
 
 def make_ubuntu_links(pkg, version):
+    """Return a string containing ubuntu links for a package"""
     puc_base = "http://packages.ubuntu.com/search?searchon=sourcenames&keywords="
     lp_base = "https://launchpad.net/ubuntu/+source/"
     ubu_bugs_base = "https://launchpad.net/ubuntu/+source/%s/+bugs"
@@ -60,6 +62,7 @@ def make_ubuntu_links(pkg, version):
 
 
 def write_header():
+    """Write the report header to file"""
     header = """<!DOCTYPE html>
 <html>
 <head>
@@ -73,6 +76,7 @@ def write_header():
 
 
 def write_footer():
+    """Write the footer header to file"""
     footer = """</br>
 <p> Wiildos Packages Health Status Report Generator is Copyright © 2013-2014 \
 Andrea Colangelo <warp10@debian.org></br>
@@ -85,11 +89,13 @@ Source code</a> is available, patches are welcome.
 
 
 def write_to_file(text, mode):
+    """Write text to file"""
     with open(REPORT, mode) as f:
         f.write(text)
 
 
 def write_table(title, data):
+    """Write a table's items to file"""
     output = "<h1>" + title + "</h1>"
     table = HTML.Table(header_row=['Source package', 'Ubuntu', 'Debian',
                                    'Upstream', 'Status', 'Debian Links',
@@ -102,18 +108,18 @@ def write_table(title, data):
 
 
 def make_row(item):
+    """Return the content of a table's row"""
     for key, value in item.items():
-        exec("%s = '%s'" % (key, value))
+        if value:
+            exec("%s = '%s'" % (key, value))
+        else:
+            exec("%s = None" % key)
     deb_links = make_debian_links(source, deb_version)
     ubu_links = make_ubuntu_links(source, ubu_version)
-    if homepage is not "None":
-        source= """<a href="%s">%s</a>""" % (homepage, source)
-    if upstream_version is "None":
-        upstream_version = ""
-    if upstream_status is "None":
-        upstream_status = ""
+    if homepage:
+        source = """<a href="%s">%s</a>""" % (homepage, source)
     return source, ubu_version, deb_version, upstream_version, \
-           upstream_status, deb_links, ubu_links
+        upstream_status, deb_links, ubu_links
 
 
 if __name__ == "__main__":
