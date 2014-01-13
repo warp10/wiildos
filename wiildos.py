@@ -192,18 +192,16 @@ people.debian.org only. This script is thought to be run on alioth."
     newer_version_available = []
     other = []
 
-    for src_pkg in WIILDOS_SRC_PKGS_LIST:
-        query = "SELECT DISTINCT sources.homepage, ubuntu_sources.source, \
-                 ubuntu_sources.version, sources.version, \
-                 upstream.upstream_version, upstream.status \
-                 FROM ubuntu_sources LEFT OUTER JOIN sources \
-                 ON ubuntu_sources.source=sources.source LEFT OUTER JOIN \
-                 upstream ON sources.source=upstream.source \
-                 WHERE ubuntu_sources.source='" + src_pkg + \
-                 "' AND ubuntu_sources.release='" + UBUNTU_RELEASE + \
-                 "' AND sources.release='" + DEBIAN_RELEASE + "';"
-        cursor.execute(query)
-
+    for src_pkg in sorted(WIILDOS_SRC_PKGS_LIST):
+        cursor.execute("SELECT DISTINCT sources.homepage, \
+                       ubuntu_sources.source, ubuntu_sources.version, \
+                       sources.version, upstream.upstream_version, \
+                       upstream.status FROM ubuntu_sources LEFT OUTER JOIN \
+                       sources ON ubuntu_sources.source=sources.source LEFT \
+                       OUTER JOIN upstream ON sources.source=upstream.source \
+                       WHERE ubuntu_sources.source=%s AND \
+                       ubuntu_sources.release=%s AND sources.release=%s", \
+                       (src_pkg, UBUNTU_RELEASE, DEBIAN_RELEASE))
         keys = ["homepage", "source", "ubu_version", "deb_version",
                 "upstream_version", "upstream_status"]
         for row in cursor.fetchall():
@@ -220,6 +218,6 @@ people.debian.org only. This script is thought to be run on alioth."
     write_table("Packages with issues:", other)
     write_table("Newer upstream version available:", newer_version_available)
     write_table("Upstream up to date:", up_to_date)
-    write_note("Packages to be packaged and uploaded to archive:", TODO_PACKAGES)
-    write_note("Packages not considered for inclusion in wiildos:", OTHER_PACKAGES)
+    write_note("Software to be packaged and uploaded to archive:", TODO_PACKAGES)
+    write_note("Software not considered for inclusion in wiildos:", OTHER_PACKAGES)
     write_footer()
