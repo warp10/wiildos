@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 #
-# Wiildos Packages Health Status Report Generator
+# WiildOS Packages Health Status Report Generator
 #
 # Copyright © 2013-2014 Andrea Colangelo <warp10@debian.org>
 #
@@ -14,6 +14,7 @@
 import psycopg2
 import datetime
 from subprocess import call
+from sys import exit
 import HTML
 
 
@@ -93,10 +94,10 @@ def write_header():
 <html>
 <head>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8" >
-        <title>iildos Packages Health Status Report</title>
+        <title>WiildOS Packages Health Status Report</title>
 </head>
 <body>
-        <center><h1>Wiildos Packages Health Status</h1></center>
+        <center><h1>WiildOS Packages Health Status</h1></center>
         <p> Report generated on: <b>%s</b><br>
         Ubuntu target release is: <b>%s</b><br>
         Debian target release is: <b>%s</b></p>
@@ -107,7 +108,7 @@ def write_header():
 def write_footer():
     """Write the footer header to file"""
     footer = """<br>
-<p> Wiildos Packages Health Status Report Generator is Copyright © 2013-2014 \
+<p> WiildOS Packages Health Status Report Generator is Copyright © 2013-2014 \
 Andrea Colangelo &lt;warp10@debian.org&gt; and is released under the terms of \
 the <a href="http://www.wtfpl.net/">WTFPL</a><br>
 <a href="https://github.com/warp10/wiildos"> \
@@ -129,7 +130,7 @@ def write_legend():
     write_to_file(str(t) + "<br>", 'a')
 
 
-def write_note(title, data):
+def write_note(title, data):  # TODO: Improve this
     output = "<h2>%s</h2>" % title
     output += HTML.list(data)
     write_to_file(output, 'a')
@@ -165,6 +166,7 @@ def make_row(item):
     ubu_links = make_ubuntu_links(source, ubu_version)
     if homepage:
         source = """<a href="%s">%s</a>""" % (homepage, source)
+    # the following if's are not'ed since dpkg return 0 when successful
     if not call(["dpkg", "--compare-versions", ubu_version, "gt",
                  deb_version]):
         bgcolor = UBU_GT_DEB_COLOR
@@ -178,7 +180,12 @@ def make_row(item):
 
 
 if __name__ == "__main__":
-    conn = psycopg2.connect("service=udd")
+    try:
+        conn = psycopg2.connect("service=udd")
+    except:
+        print "UDD accept connections from alioth.debian.org and \
+people.debian.org only. This script is thought to be run on alioth."
+        exit()
     cursor = conn.cursor()
 
     up_to_date = []
