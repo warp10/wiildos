@@ -18,7 +18,7 @@ from sys import exit
 import HTML
 
 
-TODO_PACKAGES = [
+TODO_PACKAGES = (
 "sankore, http://open-sankore.org/, http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=673322, Contatto: Claudio Valerio &lt;claudio@open-sankore.org&gt;",
 "eviacam, http://eviacam.sourceforge.net/index.php",
 "easystroke, http://easystroke.sourceforge.net/",
@@ -28,8 +28,9 @@ TODO_PACKAGES = [
 "gspeech, https://github.com/tuxmouraille/MesApps",
 "vue, http://vue.tufts.edu/",
 "educazionik",
-"vox launcher, http://code.google.com/p/vox-launcher/"]
-OTHER_PACKAGES = [
+"vox launcher, http://code.google.com/p/vox-launcher/")
+
+OTHER_PACKAGES = (
 "dasher: bugged, many deps, http://ftp.gnome.org/pub/GNOME/sources/dasher/",
 "wiican: RM, https://launchpad.net/wiican",
 "simple-scan: not considered for inclusion, https://launchpad.net/simple-scan",
@@ -42,7 +43,8 @@ OTHER_PACKAGES = [
 "pydinamic: https://bitbucket.org/zambu/pywiimote",
 "osp-tracker: http://www.cabrillo.edu/~dbrown/tracker/",
 "xuggler: http://www.xuggle.com/xuggler",
-"gtk-recordmydesktop: http://recordmydesktop.sourceforge.net/about.php",]
+"gtk-recordmydesktop: http://recordmydesktop.sourceforge.net/about.php")
+
 WIILDOS_SRC_PKGS_LIST = (
 'python-whiteboard', 'curtain', 'spotlighter', 'ardesia', 'epoptes',
 'cellwriter', 'gnome-orca', 'gpicview', 'xournal', 'dia', 'inkscape',
@@ -51,10 +53,14 @@ WIILDOS_SRC_PKGS_LIST = (
 'tuxmath', 'wxmaxima', 'lybniz', 'celestia', 'chemtool', 'gperiodic',
 'stellarium', 'gnome-chemistry-utils', 'gcompris', 'jclic', 'numptyphysics',
 'pingus', 'musescore', 'marble', 'florence')
+
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
+
 REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report.html"
+
 TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
+
 UBU_LT_DEB_COLOR = "FF4444"  # light red
 UBU_GT_DEB_COLOR = "6571DE"  # light blue
 UBU_EQ_DEB_COLOR = "FFFFFF"  # try guess
@@ -137,7 +143,7 @@ def write_note(title, data):  # TODO: Improve this
 
 
 def write_to_file(text, mode):
-    """Write text to file"""
+    """Actually write text to file"""
     with open(REPORT, mode) as f:
         f.write(text)
 
@@ -157,7 +163,7 @@ def write_table(title, data):
 
 def make_row(item):
     """Return the content of a table's row"""
-    for key, value in item.items():
+    for key, value in item.items():  # FIXME: ugly
         if value:
             exec("%s = '%s'" % (key, value))
         else:
@@ -200,11 +206,11 @@ people.debian.org only. This script is thought to be run on alioth."
                        sources ON ubuntu_sources.source=sources.source LEFT \
                        OUTER JOIN upstream ON sources.source=upstream.source \
                        WHERE ubuntu_sources.source=%s AND \
-                       ubuntu_sources.release=%s AND sources.release=%s", \
+                       ubuntu_sources.release=%s AND sources.release=%s",
                        (src_pkg, UBUNTU_RELEASE, DEBIAN_RELEASE))
         keys = ["homepage", "source", "ubu_version", "deb_version",
                 "upstream_version", "upstream_status"]
-        for row in cursor.fetchall():
+        for row in cursor.fetchall():  # could return multiple rows per pkg
             item = dict(zip(keys, row))
             if item["upstream_status"] == 'up to date':
                 up_to_date.append(item)
