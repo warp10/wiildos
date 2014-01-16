@@ -16,6 +16,7 @@ import datetime
 from subprocess import call
 from sys import exit
 import HTML
+from comments import *
 
 
 TODO_PACKAGES = (
@@ -57,7 +58,8 @@ WIILDOS_SRC_PKGS_LIST = (
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
 
-REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report.html"
+#REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report.html"
+REPORT = "/srv/home/users/mapreri-guest/wiildos-report.html"
 
 TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
 
@@ -153,7 +155,7 @@ def write_table(title, data):
     output = "<h1>" + title + "</h1>"
     table = HTML.Table(header_row=['Source package', 'Ubuntu', 'Debian',
                                    'Upstream', 'Status', 'Debian Links',
-                                   'Ubuntu Links'])
+                                   'Ubuntu Links', 'Notes'])
     for item in data:
         table.rows.append(make_row(item))
     output += str(table)
@@ -182,7 +184,25 @@ def make_row(item):
     else:
         bgcolor = UBU_EQ_DEB_COLOR
     return HTML.TableRow((source, ubu_version, deb_version, upstream_version,
-        upstream_status, deb_links, ubu_links), bgcolor)
+        upstream_status, deb_links, ubu_links, comment), bgcolor)
+
+def gen_comments(package):
+    allcomments = get_comments()
+    if package in allcomments:
+        thecomment = allcomments[package]
+    else:
+        thecomment = ""
+    o = "<form method=\\\"get\\\" action=\\\"addcomment.py\\\"><br /><input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" /><input type=\\\"text\\\" style=\\\"border-style: none;\\\" name=\\\"comment\\\" value=\\\"%s\\\" title=\\\"%s\\\" /></form>" % (package, thecomment, thecomment)
+    o += gen_buglink_from_comment(thecomment)
+
+    return o
+
+# multiline doesn't work for some silly reason.
+
+#<form method=\\\"get\\\" action=\\\"addcomment.py\\\"><br />
+#<input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" />
+#<input type=\\\"text\\\" style=\\\"border-style: none;\\\" name=\\\"comment\\\" value=\\\"%s\\\" title=\\\"%s\\\" />
+#</form>
 
 
 if __name__ == "__main__":
@@ -212,6 +232,7 @@ people.debian.org only. This script is thought to be run on alioth."
                 "upstream_version", "upstream_status"]
         for row in cursor.fetchall():  # could return multiple rows per pkg
             item = dict(zip(keys, row))
+            item.update({'comment': gen_comments(item["source"])})
             if item["upstream_status"] == 'up to date':
                 up_to_date.append(item)
             elif item["upstream_status"] == 'Newer version available':
