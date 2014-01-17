@@ -186,6 +186,10 @@ def make_row(item):
 
 
 if __name__ == "__main__":
+    up_to_date = []
+    newer_version_available = []
+    other = []
+
     try:
         conn = psycopg2.connect("service=udd")
     except:
@@ -193,10 +197,6 @@ if __name__ == "__main__":
 people.debian.org only. This script is thought to be run on alioth."
         exit()
     cursor = conn.cursor()
-
-    up_to_date = []
-    newer_version_available = []
-    other = []
 
     for src_pkg in sorted(WIILDOS_SRC_PKGS_LIST):
         cursor.execute("SELECT DISTINCT sources.homepage, \
@@ -208,6 +208,7 @@ people.debian.org only. This script is thought to be run on alioth."
                        WHERE ubuntu_sources.source=%s AND \
                        ubuntu_sources.release=%s AND sources.release=%s",
                        (src_pkg, UBUNTU_RELEASE, DEBIAN_RELEASE))
+
         keys = ["homepage", "source", "ubu_version", "deb_version",
                 "upstream_version", "upstream_status"]
         for row in cursor.fetchall():  # could return multiple rows per pkg
@@ -225,5 +226,5 @@ people.debian.org only. This script is thought to be run on alioth."
     write_table("Newer upstream version available:", newer_version_available)
     write_table("Upstream up to date:", up_to_date)
     write_note("Software to be packaged and uploaded to archive:", TODO_PACKAGES)
-    write_note("Software not considered for inclusion in wiildos:", OTHER_PACKAGES)
+    write_note("Software not considered for inclusion in WiildOS:", OTHER_PACKAGES)
     write_footer()
