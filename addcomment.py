@@ -1,6 +1,6 @@
 from comments import *
 
-def index(req)
+def index(req):
     if "package" in req.form and "comment" in req.form:
         add_comment(req.form["package"], req.form["comment"])
         if "component" in req.form:

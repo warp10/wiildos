@@ -3,8 +3,7 @@ import re
 import sys
 from cgi import escape
 
-ROOT = "/srv/home/users/mapreri-guest"
-#ROOT = "/var/www/wiildos"
+ROOT = "/srv/home/users/warp10/wiildos"
 
 # --------------------------------------------------------------------------- #
 # Comments handling

@@ -58,8 +58,7 @@ WIILDOS_SRC_PKGS_LIST = (
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
 
-#REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report.html"
-REPORT = "/srv/home/users/mapreri-guest/wiildos-report.html"
+REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report-comments.html"
 
 TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
 
