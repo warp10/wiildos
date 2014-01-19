@@ -18,32 +18,32 @@ from sys import exit
 import HTML
 
 
-TODO_PACKAGES = (
-"sankore, http://open-sankore.org/, http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=673322, Contatto: Claudio Valerio &lt;claudio@open-sankore.org&gt;",
-"eviacam, http://eviacam.sourceforge.net/index.php",
-"easystroke, http://easystroke.sourceforge.net/",
-"pencil, http://www.pencil-animation.org/",
-"wiidynamic",
-"omnitux, http://omnitux.sourceforge.net/",
-"gspeech, https://github.com/tuxmouraille/MesApps",
-"vue, http://vue.tufts.edu/",
-"educazionik",
-"vox launcher, http://code.google.com/p/vox-launcher/")
+TODO_PACKAGES = {
+"sankore": "http://open-sankore.org/, http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=673322, Contatto: Claudio Valerio &lt;claudio@open-sankore.org&gt;",
+"eviacam": "http://eviacam.sourceforge.net/index.php",
+"easystroke": "http://easystroke.sourceforge.net/",
+"pencil": "http://www.pencil-animation.org/",
+"wiidynamic": "",
+"omnitux": "http://omnitux.sourceforge.net/",
+"gspeech": "https://github.com/tuxmouraille/MesApps",
+"vue": "http://vue.tufts.edu/",
+"educazionik": "",
+"vox launcher": "http://code.google.com/p/vox-launcher/"}
 
-OTHER_PACKAGES = (
-"dasher: bugged, many deps, http://ftp.gnome.org/pub/GNOME/sources/dasher/",
-"wiican: RM, https://launchpad.net/wiican",
-"simple-scan: not considered for inclusion, https://launchpad.net/simple-scan",
-"homebank: not considered for inclusion, http://homebank.free.fr/",
-"gvb: not considered for inclusion, http://www.pietrobattiston.it",
-"gbrainy: not considered for inclusion,  https://live.gnome.org/gbrainy",
-"virtual magnifying glass: obsoleted by gnome-orca, http://magnifier.sourceforge.net/",
-"xfce4-screenshooter: http://goodies.xfce.org/projects/applications/xfce4-screenshooter",
-"drawswf: http://drawswf.sourceforge.net/",
-"pydinamic: https://bitbucket.org/zambu/pywiimote",
-"osp-tracker: http://www.cabrillo.edu/~dbrown/tracker/",
-"xuggler: http://www.xuggle.com/xuggler",
-"gtk-recordmydesktop: http://recordmydesktop.sourceforge.net/about.php")
+OTHER_PACKAGES = {
+"dasher": "bugged, many deps, http://ftp.gnome.org/pub/GNOME/sources/dasher/",
+"wiican": "RM, https://launchpad.net/wiican",
+"simple-scan": "not considered for inclusion, https://launchpad.net/simple-scan",
+"homebank": "not considered for inclusion, http://homebank.free.fr/",
+"gvb": "not considered for inclusion, http://www.pietrobattiston.it",
+"gbrainy": "not considered for inclusion,  https://live.gnome.org/gbrainy",
+"virtual magnifying glass": "obsoleted by gnome-orca, http://magnifier.sourceforge.net/",
+"xfce4-screenshooter": "http://goodies.xfce.org/projects/applications/xfce4-screenshooter",
+"drawswf": "http://drawswf.sourceforge.net/",
+"pydinamic": "https://bitbucket.org/zambu/pywiimote",
+"osp-tracker": "http://www.cabrillo.edu/~dbrown/tracker/",
+"xuggler": "http://www.xuggle.com/xuggler",
+"gtk-recordmydesktop": "http://recordmydesktop.sourceforge.net/about.php"}
 
 WIILDOS_SRC_PKGS_LIST = (
 'python-whiteboard', 'curtain', 'spotlighter', 'ardesia', 'epoptes',
@@ -183,6 +183,26 @@ def make_row(item):
         bgcolor = UBU_EQ_DEB_COLOR
     return HTML.TableRow((source, ubu_version, deb_version, upstream_version,
         upstream_status, deb_links, ubu_links), bgcolor)
+
+
+def query_wnpp(pkg_dict):
+    try:
+        conn = psycopg2.connect("service=udd")
+    except:
+        print "UDD accept connections from alioth.debian.org and \
+people.debian.org only. This script is thought to be run on alioth."
+        exit()
+    cursor = conn.cursor()
+    for pkg in pkg_dict.keys():
+        cursor.execute("SELECT id, type, title FROM wnpp WHERE title ~ '%s';" % pkg)
+        keys = ["bug_number", "bug_type", "bug_title"]
+        result = cursor.fetchall()
+        if result:
+            for row in result:
+                item = dict(zip(keys, row))
+                print item
+        else:
+            print pkg, pkg_dict[pkg]
 
 
 if __name__ == "__main__":
