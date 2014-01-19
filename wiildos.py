@@ -12,11 +12,22 @@
 
 
 import psycopg2
-import datetime
+from datetime import datetime
 from subprocess import call
 from sys import exit
 import HTML
 
+
+UBUNTU_RELEASE = 'trusty'
+DEBIAN_RELEASE = 'sid'
+
+REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report.html"
+
+TIMESTAMP = datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
+
+UBU_LT_DEB_COLOR = "FF4444"  # light red
+UBU_GT_DEB_COLOR = "6571DE"  # light blue
+UBU_EQ_DEB_COLOR = "FFFFFF"  # try guess
 
 TODO_PACKAGES = {
 "sankore": "http://open-sankore.org/, http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=673322, Contatto: Claudio Valerio &lt;claudio@open-sankore.org&gt;",
@@ -53,17 +64,6 @@ WIILDOS_SRC_PKGS_LIST = (
 'tuxmath', 'wxmaxima', 'lybniz', 'celestia', 'chemtool', 'gperiodic',
 'stellarium', 'gnome-chemistry-utils', 'gcompris', 'jclic', 'numptyphysics',
 'pingus', 'musescore', 'marble', 'florence')
-
-UBUNTU_RELEASE = 'trusty'
-DEBIAN_RELEASE = 'sid'
-
-REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report.html"
-
-TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
-
-UBU_LT_DEB_COLOR = "FF4444"  # light red
-UBU_GT_DEB_COLOR = "6571DE"  # light blue
-UBU_EQ_DEB_COLOR = "FFFFFF"  # try guess
 
 
 def make_debian_links(pkg, version):
@@ -142,6 +142,13 @@ def write_to_file(text, mode):
         f.write(text)
 
 
+def query_udd(conn, query):
+    """Actually execute a query on udd"""
+    cursor = conn.cursor()
+    cursor.execute(query)
+    return cursor.fetchall()
+
+
 def write_table(title, data):
     """Write a table's items to file"""
     output = "<h1>" + title + "</h1>"
@@ -181,7 +188,7 @@ def make_row(item):
 
 def write_other_pkgs_table(title, data):
     output = "<h2>%s</h2>" % title
-    table = HTML.Table(header_row = ["Software", "WNPP", "Notes"])
+    table = HTML.Table(header_row=["Software", "WNPP", "Notes"])
     for item in data:
         table.rows.append(HTML.TableRow(item))
     output += str(table)
@@ -189,17 +196,14 @@ def write_other_pkgs_table(title, data):
     write_to_file(output, 'a')
 
 
-def query_udd(conn, query):
-    cursor = conn.cursor()
-    cursor.execute(query)
-    return cursor.fetchall()
-
-
-def query_packages(conn, pkg_list):
+def query_other_pkgs(conn, pkg_list):
     output = []
+
     for pkg in sorted(pkg_list.keys()):
-        query = "SELECT id, title FROM wnpp WHERE title ~ '%s';" % pkg  #FIXME: false positives
+        # FIXME: false positives
+        query = "SELECT id, title FROM wnpp WHERE title ~ '%s';" % pkg
         keys = ["bug_number", "bug_title"]
+
         result = query_udd(conn, query)
         if result:
             for row in result:
@@ -217,6 +221,7 @@ if __name__ == "__main__":
     up_to_date = []
     newer_version_available = []
     other = []
+
     try:
         conn = psycopg2.connect("service=udd")
     except:
@@ -225,18 +230,16 @@ people.debian.org only. This script is thought to be run on alioth."
         exit()
 
     for src_pkg in sorted(WIILDOS_SRC_PKGS_LIST):
-        query = """SELECT DISTINCT sources.homepage,
-                ubuntu_sources.source, ubuntu_sources.version,
-                sources.version, upstream.upstream_version,
-                upstream.status FROM ubuntu_sources LEFT OUTER JOIN
-                sources ON ubuntu_sources.source=sources.source LEFT
-                OUTER JOIN upstream ON sources.source=upstream.source
-                WHERE ubuntu_sources.source='%s' AND
-                ubuntu_sources.release='%s' AND sources.release='%s'
-                """ % (src_pkg, UBUNTU_RELEASE, DEBIAN_RELEASE)
+        query = """SELECT DISTINCT s.homepage, u_s.source, u_s.version,
+                s.version, u.upstream_version, u.status FROM ubuntu_sources u_s
+                LEFT OUTER JOIN sources s ON u_s.source=s.source LEFT OUTER
+                JOIN upstream u ON s.source=u.source WHERE u_s.source='%s' AND
+                u_s.release='%s' AND s.release='%s'""" % (src_pkg,
+                UBUNTU_RELEASE, DEBIAN_RELEASE)
         keys = ["homepage", "source", "ubu_version", "deb_version",
                 "upstream_version", "upstream_status"]
-        for row in query_udd(conn, query):  # could return multiple rows per pkg
+
+        for row in query_udd(conn, query):  # can return multiple rows per pkg
             item = dict(zip(keys, row))
             if item["upstream_status"] == 'up to date':
                 up_to_date.append(item)
@@ -245,8 +248,9 @@ people.debian.org only. This script is thought to be run on alioth."
             else:
                 other.append(item)
 
-    todo_packages = query_packages(conn, TODO_PACKAGES)
-    other_packages = query_packages(conn, OTHER_PACKAGES)
+    todo_packages = query_other_pkgs(conn, TODO_PACKAGES)
+    other_packages = query_other_pkgs(conn, OTHER_PACKAGES)
+
     write_header()
     write_legend()
     write_table("Packages with issues:", other)
