@@ -195,7 +195,7 @@ if __name__ == "__main__":
     up_to_date = []
     newer_version_available = []
     other = []
-
+    todo_packages = []
     try:
         conn = psycopg2.connect("service=udd")
     except:
@@ -211,7 +211,8 @@ people.debian.org only. This script is thought to be run on alioth."
                 sources ON ubuntu_sources.source=sources.source LEFT
                 OUTER JOIN upstream ON sources.source=upstream.source
                 WHERE ubuntu_sources.source='%s' AND
-                ubuntu_sources.release='%s' AND sources.release='%s'""" % (src_pkg, UBUNTU_RELEASE, DEBIAN_RELEASE)
+                ubuntu_sources.release='%s' AND sources.release='%s'
+                """ % (src_pkg, UBUNTU_RELEASE, DEBIAN_RELEASE)
         keys = ["homepage", "source", "ubu_version", "deb_version",
                 "upstream_version", "upstream_status"]
         for row in query_udd(conn, query):  # could return multiple rows per pkg
@@ -224,21 +225,24 @@ people.debian.org only. This script is thought to be run on alioth."
                 other.append(item)
 
     for pkg in sorted(TODO_PACKAGES.keys()):
-        query = "SELECT id, type, title FROM wnpp WHERE title ~ '%s';" % pkg
-        keys = ["bug_number", "bug_type", "bug_title"]
+        query = "SELECT id, title FROM wnpp WHERE title ~ '%s';" % pkg
+        keys = ["bug_number", "bug_title"]
         result = query_udd(conn, query)
         if result:
             for row in result:
                 item = dict(zip(keys, row))
-                print item
+                link_text = "%s, %s" % (item["bug_number"], item["bug_title"])
+                link_anchor = "http://bugs.debian.org/%s" % item["bug_number"]
+                link = HTML.link(link_text, link_anchor)
+                todo_packages.append("%s: %s - %s" % (pkg, link, TODO_PACKAGES[pkg]))
         else:
-            print pkg, TODO_PACKAGES[pkg]
+            todo_packages.append("%s - %s" %(pkg, TODO_PACKAGES[pkg]))
 
     write_header()
     write_legend()
     write_table("Packages with issues:", other)
     write_table("Newer upstream version available:", newer_version_available)
     write_table("Upstream up to date:", up_to_date)
-    write_note("Software to be packaged and uploaded to archive:", TODO_PACKAGES)
-    write_note("Software not considered for inclusion in WiildOS:", OTHER_PACKAGES)
+    write_note("Software to be packaged and uploaded to archive:", todo_packages)
+    #write_note("Software not considered for inclusion in WiildOS:", OTHER_PACKAGES)
     write_footer()
