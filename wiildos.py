@@ -136,12 +136,6 @@ def write_legend():
     write_to_file(str(t) + "<br>", 'a')
 
 
-def write_note(title, data):  # TODO: Improve this
-    output = "<h2>%s</h2>" % title
-    output += HTML.list(data)
-    write_to_file(output, 'a')
-
-
 def write_to_file(text, mode):
     """Actually write text to file"""
     with open(REPORT, mode) as f:
@@ -185,6 +179,16 @@ def make_row(item):
         upstream_status, deb_links, ubu_links), bgcolor)
 
 
+def write_other_pkgs_table(title, data):
+    output = "<h2>%s</h2>" % title
+    table = HTML.Table(header_row = ["Software", "WNPP", "Notes"])
+    for item in data:
+        table.rows.append(HTML.TableRow(item))
+    output += str(table)
+    output += ("<br>")
+    write_to_file(output, 'a')
+
+
 def query_udd(conn, query):
     cursor = conn.cursor()
     cursor.execute(query)
@@ -203,9 +207,9 @@ def query_packages(conn, pkg_list):
                 link_text = "%s, %s" % (item["bug_number"], item["bug_title"])
                 link_anchor = "http://bugs.debian.org/%s" % item["bug_number"]
                 link = HTML.link(link_text, link_anchor)
-                output.append("%s: %s - %s" % (pkg, link, pkg_list[pkg]))
+                output.append((pkg, link, pkg_list[pkg]))
         else:
-            output.append("%s - %s" %(pkg, pkg_list[pkg]))
+            output.append((pkg, "", pkg_list[pkg]))
     return output
 
 
@@ -243,12 +247,13 @@ people.debian.org only. This script is thought to be run on alioth."
 
     todo_packages = query_packages(conn, TODO_PACKAGES)
     other_packages = query_packages(conn, OTHER_PACKAGES)
-
     write_header()
     write_legend()
     write_table("Packages with issues:", other)
     write_table("Newer upstream version available:", newer_version_available)
     write_table("Upstream up to date:", up_to_date)
-    write_note("Software to be packaged and uploaded to archive:", todo_packages)
-    write_note("Software not considered for inclusion in WiildOS:", other_packages)
+    write_other_pkgs_table("Software to be packaged and uploaded to archive:",
+                           todo_packages)
+    write_other_pkgs_table("Software not considered for inclusion in WiildOS:",
+                           other_packages)
     write_footer()
