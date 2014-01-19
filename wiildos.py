@@ -28,7 +28,7 @@ TODO_PACKAGES = {
 "gspeech": "https://github.com/tuxmouraille/MesApps",
 "vue": "http://vue.tufts.edu/",
 "educazionik": "",
-"vox launcher": "http://code.google.com/p/vox-launcher/"}
+"vox-launcher": "http://code.google.com/p/vox-launcher/"}
 
 OTHER_PACKAGES = {
 "dasher": "bugged, many deps, http://ftp.gnome.org/pub/GNOME/sources/dasher/",
@@ -185,24 +185,10 @@ def make_row(item):
         upstream_status, deb_links, ubu_links), bgcolor)
 
 
-def query_wnpp(pkg_dict):
-    try:
-        conn = psycopg2.connect("service=udd")
-    except:
-        print "UDD accept connections from alioth.debian.org and \
-people.debian.org only. This script is thought to be run on alioth."
-        exit()
+def query_udd(conn, query):
     cursor = conn.cursor()
-    for pkg in pkg_dict.keys():
-        cursor.execute("SELECT id, type, title FROM wnpp WHERE title ~ '%s';" % pkg)
-        keys = ["bug_number", "bug_type", "bug_title"]
-        result = cursor.fetchall()
-        if result:
-            for row in result:
-                item = dict(zip(keys, row))
-                print item
-        else:
-            print pkg, pkg_dict[pkg]
+    cursor.execute(query)
+    return cursor.fetchall()
 
 
 if __name__ == "__main__":
@@ -216,22 +202,19 @@ if __name__ == "__main__":
         print "UDD accept connections from alioth.debian.org and \
 people.debian.org only. This script is thought to be run on alioth."
         exit()
-    cursor = conn.cursor()
 
     for src_pkg in sorted(WIILDOS_SRC_PKGS_LIST):
-        cursor.execute("SELECT DISTINCT sources.homepage, \
-                       ubuntu_sources.source, ubuntu_sources.version, \
-                       sources.version, upstream.upstream_version, \
-                       upstream.status FROM ubuntu_sources LEFT OUTER JOIN \
-                       sources ON ubuntu_sources.source=sources.source LEFT \
-                       OUTER JOIN upstream ON sources.source=upstream.source \
-                       WHERE ubuntu_sources.source=%s AND \
-                       ubuntu_sources.release=%s AND sources.release=%s",
-                       (src_pkg, UBUNTU_RELEASE, DEBIAN_RELEASE))
-
+        query = """SELECT DISTINCT sources.homepage,
+                ubuntu_sources.source, ubuntu_sources.version,
+                sources.version, upstream.upstream_version,
+                upstream.status FROM ubuntu_sources LEFT OUTER JOIN
+                sources ON ubuntu_sources.source=sources.source LEFT
+                OUTER JOIN upstream ON sources.source=upstream.source
+                WHERE ubuntu_sources.source='%s' AND
+                ubuntu_sources.release='%s' AND sources.release='%s'""" % (src_pkg, UBUNTU_RELEASE, DEBIAN_RELEASE)
         keys = ["homepage", "source", "ubu_version", "deb_version",
                 "upstream_version", "upstream_status"]
-        for row in cursor.fetchall():  # could return multiple rows per pkg
+        for row in query_udd(conn, query):  # could return multiple rows per pkg
             item = dict(zip(keys, row))
             if item["upstream_status"] == 'up to date':
                 up_to_date.append(item)
@@ -239,6 +222,17 @@ people.debian.org only. This script is thought to be run on alioth."
                 newer_version_available.append(item)
             else:
                 other.append(item)
+
+    for pkg in sorted(TODO_PACKAGES.keys()):
+        query = "SELECT id, type, title FROM wnpp WHERE title ~ '%s';" % pkg
+        keys = ["bug_number", "bug_type", "bug_title"]
+        result = query_udd(conn, query)
+        if result:
+            for row in result:
+                item = dict(zip(keys, row))
+                print item
+        else:
+            print pkg, TODO_PACKAGES[pkg]
 
     write_header()
     write_legend()
