@@ -191,11 +191,28 @@ def query_udd(conn, query):
     return cursor.fetchall()
 
 
+def query_packages(conn, pkg_list):
+    output = []
+    for pkg in sorted(pkg_list.keys()):
+        query = "SELECT id, title FROM wnpp WHERE title ~ '%s';" % pkg  #FIXME: false positives
+        keys = ["bug_number", "bug_title"]
+        result = query_udd(conn, query)
+        if result:
+            for row in result:
+                item = dict(zip(keys, row))
+                link_text = "%s, %s" % (item["bug_number"], item["bug_title"])
+                link_anchor = "http://bugs.debian.org/%s" % item["bug_number"]
+                link = HTML.link(link_text, link_anchor)
+                output.append("%s: %s - %s" % (pkg, link, pkg_list[pkg]))
+        else:
+            output.append("%s - %s" %(pkg, pkg_list[pkg]))
+    return output
+
+
 if __name__ == "__main__":
     up_to_date = []
     newer_version_available = []
     other = []
-    todo_packages = []
     try:
         conn = psycopg2.connect("service=udd")
     except:
@@ -224,19 +241,8 @@ people.debian.org only. This script is thought to be run on alioth."
             else:
                 other.append(item)
 
-    for pkg in sorted(TODO_PACKAGES.keys()):
-        query = "SELECT id, title FROM wnpp WHERE title ~ '%s';" % pkg
-        keys = ["bug_number", "bug_title"]
-        result = query_udd(conn, query)
-        if result:
-            for row in result:
-                item = dict(zip(keys, row))
-                link_text = "%s, %s" % (item["bug_number"], item["bug_title"])
-                link_anchor = "http://bugs.debian.org/%s" % item["bug_number"]
-                link = HTML.link(link_text, link_anchor)
-                todo_packages.append("%s: %s - %s" % (pkg, link, TODO_PACKAGES[pkg]))
-        else:
-            todo_packages.append("%s - %s" %(pkg, TODO_PACKAGES[pkg]))
+    todo_packages = query_packages(conn, TODO_PACKAGES)
+    other_packages = query_packages(conn, OTHER_PACKAGES)
 
     write_header()
     write_legend()
@@ -244,5 +250,5 @@ people.debian.org only. This script is thought to be run on alioth."
     write_table("Newer upstream version available:", newer_version_available)
     write_table("Upstream up to date:", up_to_date)
     write_note("Software to be packaged and uploaded to archive:", todo_packages)
-    #write_note("Software not considered for inclusion in WiildOS:", OTHER_PACKAGES)
+    write_note("Software not considered for inclusion in WiildOS:", other_packages)
     write_footer()
