@@ -208,7 +208,7 @@ def query_other_pkgs(conn, pkg_list):
         if result:
             for row in result:
                 item = dict(zip(keys, row))
-                link_text = "%s, %s" % (item["bug_number"], item["bug_title"])
+                link_text = "#%s, %s" % (item["bug_number"], item["bug_title"])
                 link_anchor = "http://bugs.debian.org/%s" % item["bug_number"]
                 link = HTML.link(link_text, link_anchor)
                 output.append((pkg, link, pkg_list[pkg]))
