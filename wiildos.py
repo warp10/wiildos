@@ -4,20 +4,16 @@
 # WiildOS Packages Health Status Report Generator
 #
 # Copyright © 2013-2014 Andrea Colangelo <warp10@debian.org>
+# Copyright © 2014 Mattia Rizzolo <mattia@mapreri.org>
 #
 # This work is free. You can redistribute it and/or modify it under the
 # terms of the Do What The Fuck You Want To Public License, Version 2,
 # as published by Sam Hocevar. The full text of the license is available at:
 # http://www.wtfpl.net/txt/copying/
 
-
-import psycopg2
-import datetime
-from subprocess import call
-from sys import exit
-import HTML
-from comments import *
-
+################################################################################
+#                         VARIABLES                                            #
+################################################################################
 
 TODO_PACKAGES = (
 "sankore, http://open-sankore.org/, http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=673322, Contatto: Claudio Valerio &lt;claudio@open-sankore.org&gt;",
@@ -58,14 +54,32 @@ WIILDOS_SRC_PKGS_LIST = (
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
 
+#REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report.html"
 REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report-comments.html"
 
-TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
+MAINSCRIPT = '/srv/home/users/mapreri-guest/wiildos/wiildos.py'
+COMMENTS_FILE ="/home/groups/ubuntu-dev/htdocs/wiildos/comments.txt"
 
 UBU_LT_DEB_COLOR = "FF4444"  # light red
 UBU_GT_DEB_COLOR = "6571DE"  # light blue
 UBU_EQ_DEB_COLOR = "FFFFFF"  # try guess
 
+################################################################################
+#                       IMPORTS                                                #
+################################################################################
+
+import psycopg2
+import datetime
+import os
+import re
+import sys
+import HTML
+from subprocess import call
+from cgi import escape
+
+################################################################################
+#                         HTML STUFF                                           #
+################################################################################
 
 def make_debian_links(pkg, version):
     """Return a string containing debian links for a package"""
@@ -97,6 +111,7 @@ def make_ubuntu_links(pkg, version):
 
 def write_header():
     """Write the report header to file"""
+    TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
     header = """<!DOCTYPE html>
 <html>
 <head>
@@ -116,7 +131,8 @@ def write_footer():
     """Write the footer header to file"""
     footer = """<br>
 <p> WiildOS Packages Health Status Report Generator is Copyright © 2013-2014 \
-Andrea Colangelo &lt;warp10@debian.org&gt; and is released under the terms of \
+Andrea Colangelo &lt;warp10@debian.org&gt; and Copyright © 2014 \
+Mattia Rizzolo &lt;mattia@mapreri.org&gt; and is released under the terms of \
 the <a href="http://www.wtfpl.net/">WTFPL</a><br>
 <a href="https://github.com/warp10/wiildos"> \
 Source code</a> is available, patches are welcome.
@@ -141,7 +157,6 @@ def write_note(title, data):  # TODO: Improve this
     output = "<h2>%s</h2>" % title
     output += HTML.list(data)
     write_to_file(output, 'a')
-
 
 def write_to_file(text, mode):
     """Actually write text to file"""
@@ -185,30 +200,114 @@ def make_row(item):
     return HTML.TableRow((source, ubu_version, deb_version, upstream_version,
         upstream_status, deb_links, ubu_links, comment), bgcolor)
 
-def gen_comments(package):
+################################################################################
+#                          COMMENTS STUFF                                      #
+################################################################################
+
+def get_comments():
+    """Extract the comments from file, and return a dictionary
+        containing comments corresponding to packages"""
+    comments = {}
+
+    with open(COMMENTS_FILE, "r") as file_comments:
+        # fcntl.flock(file_comments, fcntl.LOCK_SH)
+        for line in file_comments:
+            package, comment = line.rstrip("\n").split(": ", 1)
+            comments[package] = comment
+
+    return comments
+
+def get_comment(package):
     allcomments = get_comments()
     if package in allcomments:
         thecomment = allcomments[package]
     else:
         thecomment = ""
-    o = "<form method=\\\"get\\\" action=\\\"addcomment.py\\\"><br /><input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" /><input type=\\\"text\\\" style=\\\"border-style: none;\\\" name=\\\"comment\\\" value=\\\"%s\\\" title=\\\"%s\\\" /></form>" % (package, thecomment, thecomment)
-    o += gen_buglink_from_comment(thecomment)
+    return thecomment
 
+def add_comment(package, comment):
+    """Add a comment to the comments file"""
+    with open(COMMENTS_FILE, "a") as file_comments:
+        # fcntl.flock(file_comments, fcntl.LOCK_EX)
+        the_comment = comment.replace("\n", " ")
+        the_comment = escape(the_comment[:100], quote=True)
+        file_comments.write("%s: %s\n" % (package, the_comment))
+    main()
+
+def remove_old_comments(status_file, merges):
+    """Remove old comments from the comments file using
+       component's existing status file and merges"""
+    if not os.path.exists(status_file):
+        return
+
+    packages = [ m[2] for m in merges ]
+    toremove = []
+
+    with open(status_file, "r") as file_status:
+        for line in file_status:
+            package = line.split(" ")[0]
+            if package not in packages:
+                toremove.append(package)
+
+    with open(COMMENTS_FILE, "a+") as file_comments:
+        # fcntl.flock(file_comments, fcntl.LOCK_EX)
+
+        new_lines = []
+        for line in file_comments:
+            if line.split(": ", 1)[0] not in toremove:
+                new_lines.append(line)
+
+        file_comments.truncate(0)
+
+        for line in new_lines:
+            file_comments.write(line)
+
+def gen_buglink_from_comment(comment):
+    """Return an HTML formatted Debian/Ubuntu bug link from comment"""
+    debian = re.search(".*bug #([0-9]{1,}).*", comment, re.I)
+    ubuntu = re.search(".*bug LP#([0-9]{1,}).*", comment, re.I)
+
+    html = ""
+    if debian:
+        html += "<img src=\".img/debian.png\" alt=\"Debian\" />"
+        html += "<a href=\"http://bugs.debian.org/%s\">#%s</a>" \
+            % (debian.group(1), debian.group(1))
+    elif ubuntu:
+        html += "<img src=\".img/ubuntu.png\" alt=\"Ubuntu\" />"
+        html += "<a href=\"https://launchpad.net/bugs/%s\">#%s</a>" \
+            % (ubuntu.group(1), ubuntu.group(1))
+    else:
+        html += "&nbsp;"
+
+    return html
+
+def comment_field(package):
+#    html = """
+#<form method=\\\"get\\\" action=\\\"addcomment.php\\\">
+#<input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" />
+#<input type=\\\"text\\\" name=\\\"comment\\\" value=\\\"%s\\\" />
+#</form>
+#""" % (package, get_comment(package))
+
+# the following should generate comments at page load, but doesn't seem to work fine
+#    html = "<form method=\\\"get\\\" action=\\\"addcomment.php\\\"><input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" /><?php $comment = system(/srv/home/users/mapreri-guest/wiildos/addcomment.py %s); $str = \\\"<input type=\\\\\"text\\\\\" name=\\\\\"comment\\\\\" value=\\\\\"$comment\\\\\" />\\\"; echo \\\"$str\\\"; ?></form>" % (package, package)
+    html = "<form method=\\\"get\\\" action=\\\"addcomment.php\\\"><input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" /> <input type=\\\"text\\\" name=\\\"comment\\\" value=\\\"%s\\\" /> </form>" % (package, get_comment(package))
+    return html
+
+def gen_comments(package):
+    o = comment_field(package)
+    #o += gen_buglink_from_comment(thecomment)
     return o
 
-# multiline doesn't work for some silly reason.
+################################################################################
+#                          MAIN                                                #
+################################################################################
 
-#<form method=\\\"get\\\" action=\\\"addcomment.py\\\"><br />
-#<input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" />
-#<input type=\\\"text\\\" style=\\\"border-style: none;\\\" name=\\\"comment\\\" value=\\\"%s\\\" title=\\\"%s\\\" />
-#</form>
-
-
-if __name__ == "__main__":
+def main():
     try:
         conn = psycopg2.connect("service=udd")
     except:
-        print "UDD accept connections from alioth.debian.org and \
+        print "UDD accepts connections from alioth.debian.org and \
 people.debian.org only. This script is thought to be run on alioth."
         exit()
     cursor = conn.cursor()
@@ -247,3 +346,6 @@ people.debian.org only. This script is thought to be run on alioth."
     write_note("Software to be packaged and uploaded to archive:", TODO_PACKAGES)
     write_note("Software not considered for inclusion in wiildos:", OTHER_PACKAGES)
     write_footer()
+
+if __name__ == "__main__":
+    main()
