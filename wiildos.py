@@ -54,11 +54,11 @@ WIILDOS_SRC_PKGS_LIST = (
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
 
-#REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report.html"
-REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report-comments.html"
-
-MAINSCRIPT = '/srv/home/users/mapreri-guest/wiildos/wiildos.py'
-COMMENTS_FILE ="/home/groups/ubuntu-dev/htdocs/wiildos/comments.txt"
+ROOT = '/srv/home/users/mapreri-guest/wiildos'
+WEBDIR = '/home/groups/ubuntu-dev/htdocs/wiildos'
+REPORT = WEBDIR + '/report-comments.html'
+MAINSCRIPT = ROOT + '/wiildos.py'
+COMMENTS_FILE = WEBDIR + '/comments.txt'
 
 UBU_LT_DEB_COLOR = "FF4444"  # light red
 UBU_GT_DEB_COLOR = "6571DE"  # light blue
@@ -273,12 +273,12 @@ def gen_buglink_from_comment(comment):
 
     html = ""
     if debian:
-        html += "<img src=\".img/debian.png\" alt=\"Debian\" />"
+        html += "<img src=\"debian.png\" alt=\"Debian\" />"
         html += "<a href=\"http://bugs.debian.org/%s\">#%s</a>" \
             % (debian.group(1), debian.group(1))
     elif ubuntu:
-        html += "<img src=\".img/ubuntu.png\" alt=\"Ubuntu\" />"
-        html += "<a href=\"https://launchpad.net/bugs/%s\">#%s</a>" \
+        html += "<img src=\"ubuntu.png\" alt=\"Ubuntu\" />"
+        html += "<a href=\"https://launchpad.net/bugs/%s\">LP#%s</a>" \
             % (ubuntu.group(1), ubuntu.group(1))
     else:
         html += "&nbsp;"
@@ -286,6 +286,7 @@ def gen_buglink_from_comment(comment):
     return html
 
 def comment_field(package):
+# the following should work but doesn't.
 #    html = """
 #<form method=\\\"get\\\" action=\\\"addcomment.php\\\">
 #<input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" />
@@ -300,7 +301,7 @@ def comment_field(package):
 
 def gen_comments(package):
     o = comment_field(package)
-    #o += gen_buglink_from_comment(thecomment)
+    o += gen_buglink_from_comment(get_comment(package))
     return o
 
 ################################################################################
