@@ -209,11 +209,15 @@ def get_comments():
         containing comments corresponding to packages"""
     comments = {}
 
-    with open(COMMENTS_FILE, "r") as file_comments:
-        # fcntl.flock(file_comments, fcntl.LOCK_SH)
-        for line in file_comments:
-            package, comment = line.rstrip("\n").split(": ", 1)
-            comments[package] = comment
+    try:
+        if os.stat(COMMENTS_FILE).st_size > 1:
+            with open(COMMENTS_FILE, "r") as file_comments:
+                for line in file_comments:
+                    if len(line) > 2:  # to avoid parsing empty lines
+                        package, comment = line.rstrip("\n").split(": ", 1)
+                        comments[package] = comment
+    except IOError:
+        comments = []
 
     return comments
 
