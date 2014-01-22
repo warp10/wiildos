@@ -240,13 +240,16 @@ def get_comment(package):
         thecomment = allcomments[package]
     else:
         thecomment = ""
-    return thecomment
+    comment = thecomment
+    return comment
 
 def add_comment(package, comment):
     """Add a comment to the comments file"""
     with open(COMMENTS_FILE, "a") as file_comments:
         # fcntl.flock(file_comments, fcntl.LOCK_EX)
         the_comment = comment.replace("\n", " ")
+        the_comment = the_comment.replace("\'", "\\\'")
+        the_comment = the_comment.replace("\"", "\\\"")
         the_comment = escape(the_comment[:100], quote=True)
         file_comments.write("%s: %s\n" % (package, the_comment))
     main()
@@ -285,15 +288,20 @@ def gen_buglink_from_comment(comment):
     ubuntu = re.search(".*bug LP#([0-9]{1,}).*", comment, re.I)
 
     html = ""
+    done = None
     if debian:
         html += "<img src=\"debian.png\" alt=\"Debian\" />"
         html += "<a href=\"http://bugs.debian.org/%s\">#%s</a>" \
             % (debian.group(1), debian.group(1))
-    elif ubuntu:
+        done = 1
+    if ubuntu:
+        if done:
+            html += "&nbsp;"
         html += "<img src=\"ubuntu.png\" alt=\"Ubuntu\" />"
         html += "<a href=\"https://launchpad.net/bugs/%s\">LP#%s</a>" \
             % (ubuntu.group(1), ubuntu.group(1))
-    else:
+        done = 1
+    if not done:
         html += "&nbsp;"
 
     return html
