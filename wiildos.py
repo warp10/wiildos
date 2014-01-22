@@ -4,6 +4,7 @@
 # WiildOS Packages Health Status Report Generator
 #
 # Copyright © 2013-2014 Andrea Colangelo <warp10@debian.org>
+# Copyright © 2014 Mattia Rizzolo <mattia@mapreri.org>
 #
 # This work is free. You can redistribute it and/or modify it under the
 # terms of the Do What The Fuck You Want To Public License, Version 2,
@@ -11,19 +12,18 @@
 # http://www.wtfpl.net/txt/copying/
 
 
-import psycopg2
-from datetime import datetime
-from subprocess import call
-from sys import exit
-import HTML
-
+################################################################################
+#                         VARIABLES                                            #
+################################################################################
 
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
 
-REPORT = "/home/groups/ubuntu-dev/htdocs/wiildos/report.html"
-
-TIMESTAMP = datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
+ROOT = '/srv/home/users/mapreri-guest/wiildos'
+WEBDIR = '/home/groups/ubuntu-dev/htdocs/wiildos'
+REPORT = WEBDIR + '/report-comments.html'
+MAINSCRIPT = ROOT + '/wiildos.py'
+COMMENTS_FILE = WEBDIR + '/comments.txt'
 
 UBU_LT_DEB_COLOR = "FF4444"  # light red
 UBU_GT_DEB_COLOR = "6571DE"  # light blue
@@ -65,6 +65,22 @@ WIILDOS_SRC_PKGS_LIST = (
 'stellarium', 'gnome-chemistry-utils', 'gcompris', 'jclic', 'numptyphysics',
 'pingus', 'musescore', 'marble', 'florence')
 
+################################################################################
+#                       IMPORTS                                                #
+################################################################################
+
+import psycopg2
+import datetime
+import os
+import re
+import sys
+import HTML
+from subprocess import call
+from cgi import escape
+
+################################################################################
+#                         HTML STUFF                                           #
+################################################################################
 
 def make_debian_links(pkg, version):
     """Return a string containing debian links for a package"""
@@ -96,6 +112,7 @@ def make_ubuntu_links(pkg, version):
 
 def write_header():
     """Write the report header to file"""
+    TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
     header = """<!DOCTYPE html>
 <html>
 <head>
@@ -115,7 +132,8 @@ def write_footer():
     """Write the footer header to file"""
     footer = """<br>
 <p> WiildOS Packages Health Status Report Generator is Copyright © 2013-2014 \
-Andrea Colangelo &lt;warp10@debian.org&gt; and is released under the terms of \
+Andrea Colangelo &lt;warp10@debian.org&gt; and Copyright © 2014 \
+Mattia Rizzolo &lt;mattia@mapreri.org&gt; and is released under the terms of \
 the <a href="http://www.wtfpl.net/">WTFPL</a><br>
 <a href="https://github.com/warp10/wiildos"> \
 Source code</a> is available, patches are welcome.
@@ -135,12 +153,24 @@ def write_legend():
                                 bgcolor=UBU_EQ_DEB_COLOR))
     write_to_file(str(t) + "<br>", 'a')
 
+def write_other_pkgs_table(title, data):
+    output = "<h2>%s</h2>" % title
+    table = HTML.Table(header_row=["Software", "WNPP", "Notes"])
+    for item in data:
+        table.rows.append(HTML.TableRow(item))
+    output += str(table)
+    output += ("<br>")
+    write_to_file(output, 'a')
+
+def write_note(title, data):  # TODO: Improve this
+    output = "<h2>%s</h2>" % title
+    output += HTML.list(data)
+    write_to_file(output, 'a')
 
 def write_to_file(text, mode):
     """Actually write text to file"""
     with open(REPORT, mode) as f:
         f.write(text)
-
 
 def query_udd(conn, query):
     """Actually execute a query on udd"""
@@ -148,19 +178,17 @@ def query_udd(conn, query):
     cursor.execute(query)
     return cursor.fetchall()
 
-
 def write_table(title, data):
     """Write a table's items to file"""
     output = "<h1>" + title + "</h1>"
     table = HTML.Table(header_row=['Source package', 'Ubuntu', 'Debian',
                                    'Upstream', 'Status', 'Debian Links',
-                                   'Ubuntu Links'])
+                                   'Ubuntu Links', 'Notes', 'Bugs'])
     for item in data:
         table.rows.append(make_row(item))
     output += str(table)
     output += ("<br>")
     write_to_file(output, 'a')
-
 
 def make_row(item):
     """Return the content of a table's row"""
@@ -183,18 +211,115 @@ def make_row(item):
     else:
         bgcolor = UBU_EQ_DEB_COLOR
     return HTML.TableRow((source, ubu_version, deb_version, upstream_version,
-        upstream_status, deb_links, ubu_links), bgcolor)
+        upstream_status, deb_links, ubu_links, comment, bugs), bgcolor)
 
+################################################################################
+#                          COMMENTS STUFF                                      #
+################################################################################
 
-def write_other_pkgs_table(title, data):
-    output = "<h2>%s</h2>" % title
-    table = HTML.Table(header_row=["Software", "WNPP", "Notes"])
-    for item in data:
-        table.rows.append(HTML.TableRow(item))
-    output += str(table)
-    output += ("<br>")
-    write_to_file(output, 'a')
+def get_comments():
+    """Extract the comments from file, and return a dictionary
+        containing comments corresponding to packages"""
+    comments = {}
 
+    try:
+        if os.stat(COMMENTS_FILE).st_size > 1:
+            with open(COMMENTS_FILE, "r") as file_comments:
+                for line in file_comments:
+                    if len(line) > 2:  # to avoid parsing empty lines
+                        package, comment = line.rstrip("\n").split(": ", 1)
+                        comments[package] = comment
+    except IOError:
+        comments = []
+
+    return comments
+
+def get_comment(package):
+    allcomments = get_comments()
+    if package in allcomments:
+        thecomment = allcomments[package]
+    else:
+        thecomment = ""
+    return thecomment
+
+def add_comment(package, comment):
+    """Add a comment to the comments file"""
+    with open(COMMENTS_FILE, "a") as file_comments:
+        # fcntl.flock(file_comments, fcntl.LOCK_EX)
+        the_comment = comment.replace("\n", " ")
+        the_comment = escape(the_comment[:100], quote=True)
+        file_comments.write("%s: %s\n" % (package, the_comment))
+    main()
+
+def remove_old_comments(status_file, merges):
+    """Remove old comments from the comments file using
+       component's existing status file and merges"""
+    if not os.path.exists(status_file):
+        return
+
+    packages = [ m[2] for m in merges ]
+    toremove = []
+
+    with open(status_file, "r") as file_status:
+        for line in file_status:
+            package = line.split(" ")[0]
+            if package not in packages:
+                toremove.append(package)
+
+    with open(COMMENTS_FILE, "a+") as file_comments:
+        # fcntl.flock(file_comments, fcntl.LOCK_EX)
+
+        new_lines = []
+        for line in file_comments:
+            if line.split(": ", 1)[0] not in toremove:
+                new_lines.append(line)
+
+        file_comments.truncate(0)
+
+        for line in new_lines:
+            file_comments.write(line)
+
+def gen_buglink_from_comment(comment):
+    """Return an HTML formatted Debian/Ubuntu bug link from comment"""
+    debian = re.search(".*bug #([0-9]{1,}).*", comment, re.I)
+    ubuntu = re.search(".*bug LP#([0-9]{1,}).*", comment, re.I)
+
+    html = ""
+    if debian:
+        html += "<img src=\"debian.png\" alt=\"Debian\" />"
+        html += "<a href=\"http://bugs.debian.org/%s\">#%s</a>" \
+            % (debian.group(1), debian.group(1))
+    elif ubuntu:
+        html += "<img src=\"ubuntu.png\" alt=\"Ubuntu\" />"
+        html += "<a href=\"https://launchpad.net/bugs/%s\">LP#%s</a>" \
+            % (ubuntu.group(1), ubuntu.group(1))
+    else:
+        html += "&nbsp;"
+
+    return html
+
+def comment_field(package):
+# the following should work but doesn't.
+#    html = """
+#<form method=\\\"get\\\" action=\\\"addcomment.php\\\">
+#<input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" />
+#<input type=\\\"text\\\" name=\\\"comment\\\" value=\\\"%s\\\" />
+#</form>
+#""" % (package, get_comment(package))
+
+# the following should generate comments at page load, but doesn't seem to work fine
+#    html = "<form method=\\\"get\\\" action=\\\"addcomment.php\\\"><input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" /><?php $comment = system(/srv/home/users/mapreri-guest/wiildos/addcomment.py %s); $str = \\\"<input type=\\\\\"text\\\\\" name=\\\\\"comment\\\\\" value=\\\\\"$comment\\\\\" />\\\"; echo \\\"$str\\\"; ?></form>" % (package, package)
+    html = "<form method=\\\"get\\\" action=\\\"addcomment.php\\\"><input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" /> <input type=\\\"text\\\" name=\\\"comment\\\" value=\\\"%s\\\" /> </form>" % (package, get_comment(package))
+    return html
+
+def gen_comments(package):
+    o = comment_field(package)
+    #o += gen_buglink_from_comment(get_comment(package))
+    return o
+
+################################################################################
+#                          MAIN                                                #
+################################################################################
 
 def query_other_pkgs(conn, pkg_list):
     output = []
@@ -216,16 +341,11 @@ def query_other_pkgs(conn, pkg_list):
             output.append((pkg, "", pkg_list[pkg]))
     return output
 
-
-if __name__ == "__main__":
-    up_to_date = []
-    newer_version_available = []
-    other = []
-
+def main():
     try:
         conn = psycopg2.connect("service=udd")
     except:
-        print "UDD accept connections from alioth.debian.org and \
+        print "UDD accepts connections from alioth.debian.org and \
 people.debian.org only. This script is thought to be run on alioth."
         exit()
 
@@ -241,6 +361,8 @@ people.debian.org only. This script is thought to be run on alioth."
 
         for row in query_udd(conn, query):  # can return multiple rows per pkg
             item = dict(zip(keys, row))
+            item.update({'comment': gen_comments(item["source"])})
+            item.update({'bugs': gen_buglink_from_comment(get_comment(item["source"]))})
             if item["upstream_status"] == 'up to date':
                 up_to_date.append(item)
             elif item["upstream_status"] == 'Newer version available':
@@ -261,3 +383,9 @@ people.debian.org only. This script is thought to be run on alioth."
     write_other_pkgs_table("Software not considered for inclusion in WiildOS:",
                            other_packages)
     write_footer()
+
+if __name__ == "__main__":
+    up_to_date = []
+    newer_version_available = []
+    other = []
+    main()
