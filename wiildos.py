@@ -275,15 +275,20 @@ def gen_buglink_from_comment(comment):
     ubuntu = re.search(".*bug LP#([0-9]{1,}).*", comment, re.I)
 
     html = ""
+    done = None
     if debian:
         html += "<img src=\"debian.png\" alt=\"Debian\" />"
         html += "<a href=\"http://bugs.debian.org/%s\">#%s</a>" \
             % (debian.group(1), debian.group(1))
-    elif ubuntu:
+        done = 1
+    if ubuntu:
+        if done:
+            html += "&nbsp;"
         html += "<img src=\"ubuntu.png\" alt=\"Ubuntu\" />"
         html += "<a href=\"https://launchpad.net/bugs/%s\">LP#%s</a>" \
             % (ubuntu.group(1), ubuntu.group(1))
-    else:
+        done = 1
+    if not done:
         html += "&nbsp;"
 
     return html
