@@ -169,7 +169,7 @@ def write_table(title, data):
     output = "<h1>" + title + "</h1>"
     table = HTML.Table(header_row=['Source package', 'Ubuntu', 'Debian',
                                    'Upstream', 'Status', 'Debian Links',
-                                   'Ubuntu Links', 'Notes'])
+                                   'Ubuntu Links', 'Notes', 'Bugs'])
     for item in data:
         table.rows.append(make_row(item))
     output += str(table)
@@ -198,7 +198,7 @@ def make_row(item):
     else:
         bgcolor = UBU_EQ_DEB_COLOR
     return HTML.TableRow((source, ubu_version, deb_version, upstream_version,
-        upstream_status, deb_links, ubu_links, comment), bgcolor)
+        upstream_status, deb_links, ubu_links, comment, bugs), bgcolor)
 
 ################################################################################
 #                          COMMENTS STUFF                                      #
@@ -301,7 +301,7 @@ def comment_field(package):
 
 def gen_comments(package):
     o = comment_field(package)
-    o += gen_buglink_from_comment(get_comment(package))
+    #o += gen_buglink_from_comment(get_comment(package))
     return o
 
 ################################################################################
@@ -336,6 +336,7 @@ people.debian.org only. This script is thought to be run on alioth."
         for row in cursor.fetchall():  # could return multiple rows per pkg
             item = dict(zip(keys, row))
             item.update({'comment': gen_comments(item["source"])})
+            item.update({'bugs': gen_buglink_from_comment(get_comment(item["source"]))})
             if item["upstream_status"] == 'up to date':
                 up_to_date.append(item)
             elif item["upstream_status"] == 'Newer version available':
