@@ -227,13 +227,16 @@ def get_comment(package):
         thecomment = allcomments[package]
     else:
         thecomment = ""
-    return thecomment
+    comment = thecomment
+    return comment
 
 def add_comment(package, comment):
     """Add a comment to the comments file"""
     with open(COMMENTS_FILE, "a") as file_comments:
         # fcntl.flock(file_comments, fcntl.LOCK_EX)
         the_comment = comment.replace("\n", " ")
+        the_comment = the_comment.replace("\'", "\\\'")
+        the_comment = the_comment.replace("\"", "\\\"")
         the_comment = escape(the_comment[:100], quote=True)
         file_comments.write("%s: %s\n" % (package, the_comment))
     main()

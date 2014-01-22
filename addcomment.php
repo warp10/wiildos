@@ -15,7 +15,7 @@
     $pyscript = "/srv/home/users/mapreri-guest/wiildos/wiildos.py";
 
     $package = $_GET['package'];
-    $comment = $_GET['comment'];
+    $comment = addslashes($_GET['comment']);
     $command = "python ".$pyscript;
 
     $file = fopen( $COMMENTS_FILE, "a" );
