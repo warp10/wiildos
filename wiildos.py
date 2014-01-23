@@ -267,7 +267,7 @@ def remove_old_comments():
     for package in WIILDOS_SRC_PKGS_LIST:
         packages.append(package)
 
-    for package in oldcomments:
+    for package in sorted(oldcomments.keys()):
         if package in packages:
             newpackages.append(package)
 
@@ -393,7 +393,7 @@ if __name__ == "__main__":
     up_to_date = []
     newer_version_available = []
     other = []
-    if sys.argv[1] in ('-c','-clean'):
+    if '-c' in sys.argv or '-clean' in sys.argv:
         remove_old_comments()
 
     main()
