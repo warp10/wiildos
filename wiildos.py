@@ -126,14 +126,23 @@ Source code</a> is available, patches are welcome.
 
 
 def write_legend():
-    t = HTML.Table(header_row=["Legend"])
-    t.rows.append(HTML.TableRow(("Ubuntu version lower than Debian version",),
+    """Write a legend explaining the meaning of the tables"""
+    t1 = HTML.Table(header_row=["Legend"])
+    t1.rows.append(HTML.TableRow(("Ubuntu version lower than Debian version",),
                                 bgcolor=UBU_LT_DEB_COLOR))
-    t.rows.append(HTML.TableRow(("Ubuntu version greater than Debian version",),
+    t1.rows.append(HTML.TableRow(("Ubuntu version greater than Debian version",),
                                 bgcolor=UBU_GT_DEB_COLOR))
-    t.rows.append(HTML.TableRow(("Ubuntu version matches Debian version", ),
+    t1.rows.append(HTML.TableRow(("Ubuntu version matches Debian version", ),
                                 bgcolor=UBU_EQ_DEB_COLOR))
-    write_to_file(str(t) + "<br>", 'a')
+
+    t2 = HTML.Table(header_row=["Status message", "Meaning"])
+    t2.rows.append(("error", "The watchfile couldn't be parsed. Either the watchfile is wrong or upstream changed something."))
+    t2.rows.append(("&lt;no message&gt;", "The watchfile is missing and couldnt' be checked."))
+    t2.rows.append(("Debian version newer than remote site", "The watchfile is obsolete or not working and should be updated."))
+    t2.rows.append(HTML.TableRow(("Newer version available <br> Up to date", "Self-explanatory.")))
+
+    write_to_file(str(t1) + "<br>", 'a')
+    write_to_file(str(t2) + "<br>", 'a')
 
 
 def write_to_file(text, mode):
@@ -253,7 +262,7 @@ people.debian.org only. This script is thought to be run on alioth."
 
     write_header()
     write_legend()
-    write_table("Packages with issues:", other)
+    write_table("Packages that may (or may not) have issues:", other)
     write_table("Newer upstream version available:", newer_version_available)
     write_table("Upstream up to date:", up_to_date)
     write_other_pkgs_table("Software to be packaged and uploaded to archive:",
