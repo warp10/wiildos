@@ -276,8 +276,8 @@ def remove_old_comments():
 
     with open(COMMENTS_FILE, "w") as file_comments:
         for item in newcomments:
-            o = item + ": " + newcomments[item] + "\n"
-            file_comments.write(o)
+            o += item + ": " + newcomments[item] + "\n"
+        file_comments.write(o)
 
 def gen_buglink_from_comment(comment):
     """Return an HTML formatted Debian/Ubuntu bug link from comment"""
@@ -390,20 +390,11 @@ people.debian.org only. This script is thought to be run on alioth."
     write_footer()
 
 if __name__ == "__main__":
-    argv = sys.argv[1:]
+    argv = sys.argv[:]
     up_to_date = []
     newer_version_available = []
     other = []
-    try:
-        opts = getopt.getopt(argv,"hc","clean")
-    except getopt.GetoptError:
-        print 'wiildos.py [-c|--clean]'
-        sys.exit(2)
-    for opt in opts:
-        if opt == '-h':
-            print 'wiildos.py [-c]'
-            sys.exit()
-        elif opt in ("-c","-clean"):
-            remove_old_comments()
+    if argv in ("-c","-clean"):
+        remove_old_comments()
 
     main()
