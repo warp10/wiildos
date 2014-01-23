@@ -258,7 +258,7 @@ def remove_old_comments():
     """Remove old comments from the comments file using
        component's existing status file and merges"""
 
-    print "remove"
+    o = ""
     packages = []
     oldcomments = get_comments()
     newpackages =  []
@@ -390,11 +390,10 @@ people.debian.org only. This script is thought to be run on alioth."
     write_footer()
 
 if __name__ == "__main__":
-    argv = sys.argv[:]
     up_to_date = []
     newer_version_available = []
     other = []
-    if argv in ("-c","-clean"):
+    if sys.argv[1] in ('-c','-clean'):
         remove_old_comments()
 
     main()
