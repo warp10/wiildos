@@ -267,7 +267,7 @@ def remove_old_comments():
     for package in WIILDOS_SRC_PKGS_LIST:
         packages.append(package)
 
-    for package in sorted(oldcomments.keys()):
+    for package in oldcomments.keys():
         if package in packages:
             newpackages.append(package)
 
@@ -275,7 +275,7 @@ def remove_old_comments():
         newcomments[package] = get_comment(package)
 
     with open(COMMENTS_FILE, "w") as file_comments:
-        for item in newcomments:
+        for item in sorted(newcomments.keys()):
             o += item + ": " + newcomments[item] + "\n"
         file_comments.write(o)
 
