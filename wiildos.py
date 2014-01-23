@@ -73,7 +73,7 @@ import psycopg2
 import datetime
 import os
 import re
-import sys
+import sys, getopt
 import HTML
 from subprocess import call
 from cgi import escape
@@ -230,7 +230,7 @@ def get_comments():
                         package, comment = line.rstrip("\n").split(": ", 1)
                         comments[package] = comment
     except IOError:
-        comments = []
+        comments = {}
 
     return comments
 
@@ -254,33 +254,30 @@ def add_comment(package, comment):
         file_comments.write("%s: %s\n" % (package, the_comment))
     main()
 
-def remove_old_comments(status_file, merges):
+def remove_old_comments():
     """Remove old comments from the comments file using
        component's existing status file and merges"""
-    if not os.path.exists(status_file):
-        return
 
-    packages = [ m[2] for m in merges ]
-    toremove = []
+    print "remove"
+    packages = []
+    oldcomments = get_comments()
+    newpackages =  []
+    newcomments = {}
 
-    with open(status_file, "r") as file_status:
-        for line in file_status:
-            package = line.split(" ")[0]
-            if package not in packages:
-                toremove.append(package)
+    for package in WIILDOS_SRC_PKGS_LIST:
+        packages.append(package)
 
-    with open(COMMENTS_FILE, "a+") as file_comments:
-        # fcntl.flock(file_comments, fcntl.LOCK_EX)
+    for package in oldcomments:
+        if package in packages:
+            newpackages.append(package)
 
-        new_lines = []
-        for line in file_comments:
-            if line.split(": ", 1)[0] not in toremove:
-                new_lines.append(line)
+    for package in newpackages:
+        newcomments[package] = get_comment(package)
 
-        file_comments.truncate(0)
-
-        for line in new_lines:
-            file_comments.write(line)
+    with open(COMMENTS_FILE, "w") as file_comments:
+        for item in newcomments:
+            o = item + ": " + newcomments[item] + "\n"
+            file_comments.write(o)
 
 def gen_buglink_from_comment(comment):
     """Return an HTML formatted Debian/Ubuntu bug link from comment"""
@@ -393,7 +390,20 @@ people.debian.org only. This script is thought to be run on alioth."
     write_footer()
 
 if __name__ == "__main__":
+    argv = sys.argv[1:]
     up_to_date = []
     newer_version_available = []
     other = []
+    try:
+        opts = getopt.getopt(argv,"hc","clean")
+    except getopt.GetoptError:
+        print 'wiildos.py [-c|--clean]'
+        sys.exit(2)
+    for opt in opts:
+        if opt == '-h':
+            print 'wiildos.py [-c]'
+            sys.exit()
+        elif opt in ("-c","-clean"):
+            remove_old_comments()
+
     main()
