@@ -355,7 +355,10 @@ def query_other_pkgs(conn, pkg_list):
             output.append((pkg, "", pkg_list[pkg]))
     return output
 
-def main():
+if __name__ == "__main__":
+    if '-c' in sys.argv or '--clean' in sys.argv:
+        remove_old_comments()
+
     try:
         conn = psycopg2.connect("service=udd")
     except:
@@ -363,6 +366,9 @@ def main():
 people.debian.org only. This script is thought to be run on alioth."
         exit()
 
+    up_to_date = []
+    newer_version_available = []
+    other = []
     for src_pkg in sorted(WIILDOS_SRC_PKGS_LIST):
         query = """SELECT DISTINCT s.homepage, u_s.source, u_s.version,
                 s.version, u.upstream_version, u.status FROM ubuntu_sources u_s
@@ -397,12 +403,3 @@ people.debian.org only. This script is thought to be run on alioth."
     write_other_pkgs_table("Software not considered for inclusion in WiildOS:",
                            other_packages)
     write_footer()
-
-if __name__ == "__main__":
-    up_to_date = []
-    newer_version_available = []
-    other = []
-    if '-c' in sys.argv or '-clean' in sys.argv:
-        remove_old_comments()
-
-    main()
