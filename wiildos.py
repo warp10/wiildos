@@ -249,13 +249,11 @@ def get_comment(package):
         thecomment = allcomments[package]
     else:
         thecomment = ""
-    comment = thecomment
-    return comment
+    return thecomment
 
 def add_comment(package, comment):
     """Add a comment to the comments file"""
     with open(COMMENTS_FILE, "a") as file_comments:
-        # fcntl.flock(file_comments, fcntl.LOCK_EX)
         the_comment = comment.replace("\n", " ")
         the_comment = the_comment.replace("\'", "\\\'")
         the_comment = the_comment.replace("\"", "\\\"")
@@ -264,8 +262,7 @@ def add_comment(package, comment):
     main()
 
 def remove_old_comments():
-    """Remove old comments from the comments file using
-       component's existing status file and merges"""
+    # Clean comments file removing package not in list anymore and old comments
 
     o = ""
     packages = []
@@ -273,11 +270,8 @@ def remove_old_comments():
     newpackages =  []
     newcomments = {}
 
-    for package in WIILDOS_SRC_PKGS_LIST:
-        packages.append(package)
-
     for package in oldcomments.keys():
-        if package in packages:
+        if package in WIILDOS_SRC_PKGS_LIST:
             newpackages.append(package)
 
     for package in newpackages:
@@ -312,7 +306,7 @@ def gen_buglink_from_comment(comment):
 
     return html
 
-def comment_field(package):
+def gen_comments(package):
 # the following should work but doesn't.
 #    html = """
 #<form method=\\\"get\\\" action=\\\"addcomment.php\\\">
@@ -325,11 +319,6 @@ def comment_field(package):
 #    html = "<form method=\\\"get\\\" action=\\\"addcomment.php\\\"><input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" /><?php $comment = system(/srv/home/users/mapreri-guest/wiildos/addcomment.py %s); $str = \\\"<input type=\\\\\"text\\\\\" name=\\\\\"comment\\\\\" value=\\\\\"$comment\\\\\" />\\\"; echo \\\"$str\\\"; ?></form>" % (package, package)
     html = "<form method=\\\"get\\\" action=\\\"addcomment.php\\\"><input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" /> <input type=\\\"text\\\" name=\\\"comment\\\" value=\\\"%s\\\" /> </form>" % (package, get_comment(package))
     return html
-
-def gen_comments(package):
-    o = comment_field(package)
-    #o += gen_buglink_from_comment(get_comment(package))
-    return o
 
 ################################################################################
 #                          MAIN                                                #
