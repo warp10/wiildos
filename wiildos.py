@@ -30,16 +30,16 @@ UBU_GT_DEB_COLOR = "6571DE"  # light blue
 UBU_EQ_DEB_COLOR = "FFFFFF"  # try guess
 
 TODO_PACKAGES = {
-"sankore": "http://open-sankore.org/, http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=673322, Contatto: Claudio Valerio &lt;claudio@open-sankore.org&gt;",
-"eviacam": "http://eviacam.sourceforge.net/index.php",
-"easystroke": "http://easystroke.sourceforge.net/",
-"pencil": "http://www.pencil-animation.org/",
+"sankore": "<a href=\"http://open-sankore.org\">http://open-sankore.org</a>, <a href=\"http://bugs.debian.org/673322\">#673322</a>, Contatto: Claudio Valerio &lt;<a href=\"mailto:claudio@open-sankore.org\">claudio@open-sankore.org</a>&gt;",
+"eviacam": "<a href=\"http://eviacam.sourceforge.net/\">http://eviacam.sourceforge.net</a>",
+"easystroke": "<a href=\"http://easystroke.sourceforge.net/\">http://easystroke.sourceforge.net</a>",
+"pencil": "<a href=\"http://www.pencil-animation.org/\">http://www.pencil-animation.org</a>",
 "wiidynamic": "",
-"omnitux": "http://omnitux.sourceforge.net/",
-"gspeech": "https://github.com/tuxmouraille/MesApps",
-"vue": "http://vue.tufts.edu/",
+"omnitux": "<a href=\"http://omnitux.sourceforge.net/\">http://omnitux.sourceforge.net</a>",
+"gspeech": "<a href=\"https://github.com/tuxmouraille/MesApps\">https://github.com/tuxmouraille/MesApps</a>",
+"vue": "<a href=\"http://vue.tufts.edu/\">http://vue.tufts.edu</a>",
 "educazionik": "",
-"vox-launcher": "http://code.google.com/p/vox-launcher/"}
+"vox-launcher": "<a href=\"http://code.google.com/p/vox-launcher/\">http://code.google.com/p/vox-launcher</a>"}
 
 OTHER_PACKAGES = {
 "dasher": "bugged, many deps, http://ftp.gnome.org/pub/GNOME/sources/dasher/",
