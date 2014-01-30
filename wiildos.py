@@ -33,7 +33,7 @@ TODO_PACKAGES = {
 "sankore": "<a href=\"http://open-sankore.org\">http://open-sankore.org</a>, <a href=\"http://bugs.debian.org/673322\">#673322</a>, Contatto: Claudio Valerio &lt;<a href=\"mailto:claudio@open-sankore.org\">claudio@open-sankore.org</a>&gt;",
 "eviacam": "<a href=\"http://eviacam.sourceforge.net/\">http://eviacam.sourceforge.net</a>",
 "easystroke": "<a href=\"http://easystroke.sourceforge.net/\">http://easystroke.sourceforge.net</a>",
-"pencil": "<a href=\"http://www.pencil-animation.org/\">http://www.pencil-animation.org</a>",
+"pencil2d": "<a href=\"http://www.pencil2d.org\">http://www.pencil2d.org</a>",
 "wiidynamic": "",
 "omnitux": "<a href=\"http://omnitux.sourceforge.net/\">http://omnitux.sourceforge.net</a>",
 "gspeech": "<a href=\"https://github.com/tuxmouraille/MesApps\">https://github.com/tuxmouraille/MesApps</a>",
