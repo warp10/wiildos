@@ -64,7 +64,7 @@ WIILDOS_SRC_PKGS_LIST = (
 'freeplane', 'fbreader', 'ocrfeeder', 'tuxpaint', 'collatinus', 'geogebra',
 'tuxmath', 'wxmaxima', 'lybniz', 'celestia', 'chemtool', 'gperiodic',
 'stellarium', 'gnome-chemistry-utils', 'gcompris', 'jclic', 'numptyphysics',
-'pingus', 'musescore', 'marble', 'florence')
+'pingus', 'musescore', 'marble', 'florence', 'xinput-calibrator')
 
 
 def make_debian_links(pkg, version):
