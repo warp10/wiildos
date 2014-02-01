@@ -28,6 +28,7 @@ TIMESTAMP = datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
 UBU_LT_DEB_COLOR = "FF4444"  # light red
 UBU_GT_DEB_COLOR = "6571DE"  # light blue
 UBU_EQ_DEB_COLOR = "FFFFFF"  # try guess
+MIS_IN_DEB_COLOR = "F9F940"  # light yellow
 
 TODO_PACKAGES = {
 "sankore": "<a href=\"http://open-sankore.org\">http://open-sankore.org</a>, <a href=\"http://bugs.debian.org/673322\">#673322</a>, Contatto: Claudio Valerio &lt;<a href=\"mailto:claudio@open-sankore.org\">claudio@open-sankore.org</a>&gt;",
@@ -134,6 +135,8 @@ def write_legend():
                                 bgcolor=UBU_GT_DEB_COLOR))
     t1.rows.append(HTML.TableRow(("Ubuntu version matches Debian version", ),
                                 bgcolor=UBU_EQ_DEB_COLOR))
+    t1.rows.append(HTML.TableRow(("Ubuntu package missing in Debian", ),
+                                bgcolor=MIS_IN_DEB_COLOR))
 
     t2 = HTML.Table(header_row=["Status message", "Meaning"])
     t2.rows.append(("error", "The watchfile couldn't be parsed. Either the watchfile is wrong or upstream changed something."))
@@ -182,15 +185,20 @@ def make_row(item):
     ubu_links = make_ubuntu_links(source, ubu_version)
     if homepage:
         source = """<a href="%s">%s</a>""" % (homepage, source)
-    # the following if's are not'ed since dpkg return 0 when successful
-    if not call(["dpkg", "--compare-versions", ubu_version, "gt",
-                 deb_version]):
-        bgcolor = UBU_GT_DEB_COLOR
-    elif not call(["dpkg", "--compare-versions", ubu_version, "lt",
-                   deb_version]):
-        bgcolor = UBU_LT_DEB_COLOR
+    if not deb_version:
+        bgcolor = MIS_IN_DEB_COLOR
+        deb_version = "MISSING"
+        upstream_status = "MISSING IN DEBIAN"
     else:
-        bgcolor = UBU_EQ_DEB_COLOR
+    # the following if's are not'ed since dpkg return 0 when successful
+        if not call(["dpkg", "--compare-versions", ubu_version, "gt",
+                     deb_version]):
+            bgcolor = UBU_GT_DEB_COLOR
+        elif not call(["dpkg", "--compare-versions", ubu_version, "lt",
+                       deb_version]):
+            bgcolor = UBU_LT_DEB_COLOR
+        else:
+            bgcolor = UBU_EQ_DEB_COLOR
     return HTML.TableRow((source, ubu_version, deb_version, upstream_version,
         upstream_status, deb_links, ubu_links), bgcolor)
 
@@ -243,8 +251,8 @@ people.debian.org only. This script is thought to be run on alioth."
                 s.version, u.upstream_version, u.status FROM ubuntu_sources u_s
                 LEFT OUTER JOIN sources s ON u_s.source=s.source LEFT OUTER
                 JOIN upstream u ON s.source=u.source WHERE u_s.source='%s' AND
-                u_s.release='%s' AND s.release='%s'""" % (src_pkg,
-                UBUNTU_RELEASE, DEBIAN_RELEASE)
+                u_s.release='%s' AND (s.release IS NULL OR s.release='%s')
+                """ % (src_pkg, UBUNTU_RELEASE, DEBIAN_RELEASE)
         keys = ["homepage", "source", "ubu_version", "deb_version",
                 "upstream_version", "upstream_status"]
 
