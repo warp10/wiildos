@@ -38,9 +38,16 @@ TODO_PACKAGES = {
 "wiidynamic": "",
 "omnitux": "<a href=\"http://omnitux.sourceforge.net/\">http://omnitux.sourceforge.net</a>",
 "gspeech": "<a href=\"https://github.com/tuxmouraille/MesApps\">https://github.com/tuxmouraille/MesApps</a>",
-"vue": "<a href=\"http://vue.tufts.edu/\">http://vue.tufts.edu</a>",
+"designvue": "<a href=\"http://www3.imperial.ac.uk/designengineering/tools/designvue\">http://www3.imperial.ac.uk/designengineering/tools/designvue</a>",
 "educazionik": "",
-"vox-launcher": "<a href=\"http://code.google.com/p/vox-launcher/\">http://code.google.com/p/vox-launcher</a>"}
+"vox-launcher": "<a href=\"http://code.google.com/p/vox-launcher/\">http://code.google.com/p/vox-launcher</a>",
+"gSharkdown": "<a href=\"https://bitbucket.org/vkolev/gsharkdown\">https://bitbucket.org/vkolev/gsharkdown</a>",
+"gst2tuio": "<a href=\"http://gst2tuio.sourceforge.net/\">http://gst2tuio.sourceforge.net/</a>",
+"skippy-xd": "<a href=\"https://github.com/richardgv/skippy-xd\">https://github.com/richardgv/skippy-xd</a>",
+"slimlock": "<a href=\"http://joelburget.com/slimlock/\">http://joelburget.com/slimlock/</a>",
+"yad": "<a href=\"https://code.google.com/p/yad/\">https://code.google.com/p/yad/</a>",
+"classmate-pc-drivers": "<a href=\"https://code.google.com/p/classmate-pc-drivers/\">https://code.google.com/p/classmate-pc-drivers/\"</a>"
+}
 
 OTHER_PACKAGES = {
 "dasher": "bugged, many deps, http://ftp.gnome.org/pub/GNOME/sources/dasher/",
@@ -64,7 +71,9 @@ WIILDOS_SRC_PKGS_LIST = (
 'freeplane', 'fbreader', 'ocrfeeder', 'tuxpaint', 'collatinus', 'geogebra',
 'tuxmath', 'wxmaxima', 'lybniz', 'celestia', 'chemtool', 'gperiodic',
 'stellarium', 'gnome-chemistry-utils', 'gcompris', 'jclic', 'numptyphysics',
-'pingus', 'musescore', 'marble', 'florence', 'xinput-calibrator')
+'pingus', 'musescore', 'marble', 'florence', 'xinput-calibrator', 'asunder',
+'galculator', 'lxlauncher', 'menulibre', 'minitube', 'compton', 'wine', 'vlc',
+'geary')
 
 
 def make_debian_links(pkg, version):
