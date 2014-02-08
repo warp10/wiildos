@@ -46,7 +46,10 @@ TODO_PACKAGES = {
 "skippy-xd": "<a href=\"https://github.com/richardgv/skippy-xd\">https://github.com/richardgv/skippy-xd</a>",
 "slimlock": "<a href=\"http://joelburget.com/slimlock/\">http://joelburget.com/slimlock/</a>",
 "yad": "<a href=\"https://code.google.com/p/yad/\">https://code.google.com/p/yad/</a>",
-"classmate-pc-drivers": "<a href=\"https://code.google.com/p/classmate-pc-drivers/\">https://code.google.com/p/classmate-pc-drivers/\"</a>"
+"classmate-pc-drivers": "<a href=\"https://code.google.com/p/classmate-pc-drivers/\">https://code.google.com/p/classmate-pc-drivers/\"</a>",
+"tbo": "<a href=\"https://wiki.gnome.org/action/show/Apps/TBO?action=show&redirect=TBO%3E\">https://wiki.gnome.org/action/show/Apps/TBO?action=show&redirect=TBO%3E\"</a>",
+"unique-launch": "<a href=\"http://svn.gna.org/viewcvs/doudoulinux/packages/trunk/tweaks/doudoulinux-icons/unique-launch/\">http://svn.gna.org/viewcvs/doudoulinux/packages/trunk/tweaks/doudoulinux-icons/unique-launch/\"</a>",
+"wine": "Obsolete in Ubuntu"
 }
 
 OTHER_PACKAGES = {
@@ -58,7 +61,6 @@ OTHER_PACKAGES = {
 "gbrainy": "not considered for inclusion,  https://live.gnome.org/gbrainy",
 "virtual magnifying glass": "obsoleted by gnome-orca, http://magnifier.sourceforge.net/",
 "xfce4-screenshooter": "http://goodies.xfce.org/projects/applications/xfce4-screenshooter",
-"drawswf": "http://drawswf.sourceforge.net/",
 "pydinamic": "https://bitbucket.org/zambu/pywiimote",
 "osp-tracker": "http://www.cabrillo.edu/~dbrown/tracker/",
 "xuggler": "http://www.xuggle.com/xuggler",
@@ -73,7 +75,7 @@ WIILDOS_SRC_PKGS_LIST = (
 'stellarium', 'gnome-chemistry-utils', 'gcompris', 'jclic', 'numptyphysics',
 'pingus', 'musescore', 'marble', 'florence', 'xinput-calibrator', 'asunder',
 'galculator', 'lxlauncher', 'menulibre', 'minitube', 'compton', 'wine', 'vlc',
-'geary')
+'geary', 'vlc')
 
 
 def make_debian_links(pkg, version):
