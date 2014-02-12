@@ -31,7 +31,7 @@ UBU_EQ_DEB_COLOR = "FFFFFF"  # try guess
 MIS_IN_DEB_COLOR = "F9F940"  # light yellow
 
 TODO_PACKAGES = {
-"sankore": "<a href=\"http://open-sankore.org\">http://open-sankore.org</a>, <a href=\"http://bugs.debian.org/673322\">#673322</a>, Contatto: Claudio Valerio &lt;<a href=\"mailto:claudio@open-sankore.org\">claudio@open-sankore.org</a>&gt;",
+"openboard": "<a href=\"http://oe-f.org/en/\">http://oe-f.org/en/</a>, <a href=\"http://bugs.debian.org/673322\">#673322</a>, Contatto: Claudio Valerio &lt;<a href=\"mailto:claudio.valerio@oe-f.org\">claudio.valerio@oe-f.org</a>&gt;",
 "eviacam": "<a href=\"http://eviacam.sourceforge.net/\">http://eviacam.sourceforge.net</a>",
 "easystroke": "<a href=\"http://easystroke.sourceforge.net/\">http://easystroke.sourceforge.net</a>",
 "pencil2d": "<a href=\"http://www.pencil2d.org\">http://www.pencil2d.org</a>",
