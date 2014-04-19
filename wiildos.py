@@ -19,10 +19,8 @@
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
 
-ROOT = '/srv/home/users/mapreri-guest/wiildos'
 WEBDIR = '/home/groups/ubuntu-dev/htdocs/wiildos'
 REPORT = WEBDIR + '/report-comments.html'
-MAINSCRIPT = ROOT + '/wiildos.py'
 COMMENTS_FILE = WEBDIR + '/comments.txt'
 
 UBU_LT_DEB_COLOR = "FF4444"  # light red
