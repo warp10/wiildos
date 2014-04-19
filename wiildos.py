@@ -73,7 +73,7 @@ WIILDOS_SRC_PKGS_LIST = (
 'stellarium', 'gnome-chemistry-utils', 'gcompris', 'jclic', 'numptyphysics',
 'pingus', 'musescore', 'marble', 'florence', 'xinput-calibrator', 'asunder',
 'galculator', 'lxlauncher', 'menulibre', 'minitube', 'compton', 'wine', 'vlc',
-'geary', 'vlc')
+'geary')
 
 ################################################################################
 #                       IMPORTS                                                #
