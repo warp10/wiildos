@@ -11,18 +11,20 @@
  *
  */
 
-    $COMMENTS_FILE ="/home/groups/ubuntu-dev/htdocs/wiildos/comments.txt";
+    $COMMENTS_FILE ="/home/groups/ubuntu-dev/htdocs/wiildos/comments.json";
     $pyscript = "/srv/home/users/mapreri-guest/wiildos/wiildos.py";
 
     $package = $_GET['package'];
     $comment = addslashes($_GET['comment']);
+    $the_comment = str_replace( "\n", " ", $comment );
     $command = "python ".$pyscript;
 
-    $file = fopen( $COMMENTS_FILE, "a" );
-    $the_comment = str_replace( "\n", " ", $comment );
-    $output = $package.": ".$the_comment."\n";
-    fwrite( $file, $output );
-    fclose( $file );
+    $json = json_decode(file_get_contents($COMMENTS_FILE), true);
+
+    $json[$package] = $the_comment;
+
+    file_put_contents($COMMENTS_FILE, json_encode($json, JSON_PRETTY_PRINT));
+
     system($command);
     header('Location: '.$_SERVER['HTTP_REFERER']);
 

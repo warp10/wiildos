@@ -21,7 +21,7 @@ DEBIAN_RELEASE = 'sid'
 
 WEBDIR = '/home/groups/ubuntu-dev/htdocs/wiildos'
 REPORT = WEBDIR + '/report-comments.html'
-COMMENTS_FILE = WEBDIR + '/comments.txt'
+COMMENTS_FILE = WEBDIR + '/comments.json'
 
 UBU_LT_DEB_COLOR = "FF4444"  # light red
 UBU_GT_DEB_COLOR = "6571DE"  # light blue
@@ -83,6 +83,7 @@ import psycopg2
 import datetime
 import os
 import re
+import json
 import sys, getopt
 import HTML
 from subprocess import call
@@ -193,12 +194,6 @@ def write_to_file(text, mode):
     with open(REPORT, mode) as f:
         f.write(text)
 
-def query_udd(conn, query):
-    """Actually execute a query on udd"""
-    cursor = conn.cursor()
-    cursor.execute(query)
-    return cursor.fetchall()
-
 def write_table(title, data):
     """Write a table's items to file"""
     output = "<h1>" + title + "</h1>"
@@ -249,55 +244,37 @@ def get_comments():
     comments = {}
 
     try:
-        if os.stat(COMMENTS_FILE).st_size > 1:
-            with open(COMMENTS_FILE, "r") as file_comments:
-                for line in file_comments:
-                    if len(line) > 2:  # to avoid parsing empty lines
-                        package, comment = line.rstrip("\n").split(": ", 1)
-                        comments[package] = comment
-    except IOError:
+        with open(COMMENTS_FILE, "r") as file_comments:
+            comments = json.load(file_comments)
+    except:
         comments = {}
-
     return comments
 
 def get_comment(package):
-    allcomments = get_comments()
-    if package in allcomments:
-        thecomment = allcomments[package]
+    comments = get_comments()
+    if package in comments:
+        thecomment = comments[package]
     else:
         thecomment = ""
     return thecomment
 
-def add_comment(package, comment):
-    """Add a comment to the comments file"""
-    with open(COMMENTS_FILE, "a") as file_comments:
-        the_comment = comment.replace("\n", " ")
-        the_comment = the_comment.replace("\'", "\\\'")
-        the_comment = the_comment.replace("\"", "\\\"")
-        the_comment = escape(the_comment[:100], quote=True)
-        file_comments.write("%s: %s\n" % (package, the_comment))
-    main()
-
 def remove_old_comments():
-    # Clean comments file removing package not in list anymore and old comments
+    '''Clean comments file removing package not in list anymore and old comments'''
 
-    o = ""
-    packages = []
+    packages = WIILDOS_SRC_PKGS_LIST
     oldcomments = get_comments()
     newpackages =  []
     newcomments = {}
 
     for package in oldcomments.keys():
-        if package in WIILDOS_SRC_PKGS_LIST:
+        if package in packages:
             newpackages.append(package)
 
     for package in newpackages:
         newcomments[package] = get_comment(package)
 
     with open(COMMENTS_FILE, "w") as file_comments:
-        for item in sorted(newcomments.keys()):
-            o += item + ": " + newcomments[item] + "\n"
-        file_comments.write(o)
+        json.dump(newcomments, file_comments, indent=4)
 
 def gen_buglink_from_comment(comment):
     """Return an HTML formatted Debian/Ubuntu bug link from comment"""
@@ -340,6 +317,12 @@ def gen_comments(package):
 ################################################################################
 #                          MAIN                                                #
 ################################################################################
+
+def query_udd(conn, query):
+    """Actually execute a query on udd"""
+    cursor = conn.cursor()
+    cursor.execute(query)
+    return cursor.fetchall()
 
 def query_other_pkgs(conn, pkg_list):
     output = []
