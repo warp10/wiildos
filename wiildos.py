@@ -37,7 +37,7 @@ TODO_PACKAGES = {
 "pencil2d": "<a href=\"http://www.pencil2d.org\">http://www.pencil2d.org</a>",
 "wiidynamic": "",
 "omnitux": "<a href=\"http://omnitux.sourceforge.net/\">http://omnitux.sourceforge.net</a>",
-"gspeech": "<a href=\"https://github.com/tuxmouraille/MesApps\">https://github.com/tuxmouraille/MesApps</a>",
+"gspeech": "<a href=\"https://github.com/tuxmouraille/gSpeech\">https://github.com/tuxmouraille/gSpeech</a>",
 "designvue": "<a href=\"http://www3.imperial.ac.uk/designengineering/tools/designvue\">http://www3.imperial.ac.uk/designengineering/tools/designvue</a>",
 "educazionik": "",
 "vox-launcher": "<a href=\"http://code.google.com/p/vox-launcher/\">http://code.google.com/p/vox-launcher</a>",
