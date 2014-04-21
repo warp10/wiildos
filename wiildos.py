@@ -27,8 +27,10 @@ UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
 
 WEBDIR = '/home/groups/ubuntu-dev/htdocs/wiildos'
-REPORT = WEBDIR + '/report-comments.html'
+REPORT = WEBDIR + '/report.html'
 COMMENTS_FILE = WEBDIR + '/comments.json'
+
+TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
 
 UBU_LT_DEB_COLOR = "FF4444"  # light red
 UBU_GT_DEB_COLOR = "6571DE"  # light blue
@@ -113,7 +115,6 @@ def make_ubuntu_links(pkg, version):
 
 def write_header():
     """Write the report header to file"""
-    TIMESTAMP = datetime.datetime.utcnow().strftime("%A, %d %B %Y, %H:%M UTC")
     header = """<!DOCTYPE html>
 <html>
 <head>
@@ -340,6 +341,10 @@ def query_other_pkgs(conn, pkg_list):
 
 
 if __name__ == "__main__":
+    up_to_date = []
+    newer_version_available = []
+    other = []
+
     if '-c' in sys.argv or '--clean' in sys.argv:
         remove_old_comments()
 
@@ -350,9 +355,6 @@ if __name__ == "__main__":
 people.debian.org only. This script is thought to be run on alioth."
         exit()
 
-    up_to_date = []
-    newer_version_available = []
-    other = []
     for src_pkg in sorted(WIILDOS_SRC_PKGS_LIST):
         query = """SELECT DISTINCT s.homepage, u_s.source, u_s.version,
                 s.version, u.upstream_version, u.status FROM ubuntu_sources u_s
