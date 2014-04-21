@@ -12,9 +12,16 @@
 # http://www.wtfpl.net/txt/copying/
 
 
-################################################################################
-#                         VARIABLES                                            #
-################################################################################
+import psycopg2
+import datetime
+import os
+import re
+import json
+import sys, getopt
+import HTML
+from subprocess import call
+from cgi import escape
+
 
 UBUNTU_RELEASE = 'trusty'
 DEBIAN_RELEASE = 'sid'
@@ -35,7 +42,7 @@ TODO_PACKAGES = {
 "pencil2d": "<a href=\"http://www.pencil2d.org\">http://www.pencil2d.org</a>",
 "wiidynamic": "",
 "omnitux": "<a href=\"http://omnitux.sourceforge.net/\">http://omnitux.sourceforge.net</a>",
-"gspeech": "<a href=\"https://github.com/tuxmouraille/MesApps\">https://github.com/tuxmouraille/MesApps</a>",
+"gspeech": "<a href=\"https://github.com/tuxmouraille/gSpeech\">https://github.com/tuxmouraille/gSpeech</a>",
 "designvue": "<a href=\"http://www3.imperial.ac.uk/designengineering/tools/designvue\">http://www3.imperial.ac.uk/designengineering/tools/designvue</a>",
 "educazionik": "",
 "vox-launcher": "<a href=\"http://code.google.com/p/vox-launcher/\">http://code.google.com/p/vox-launcher</a>",
@@ -73,25 +80,8 @@ WIILDOS_SRC_PKGS_LIST = (
 'stellarium', 'gnome-chemistry-utils', 'gcompris', 'jclic', 'numptyphysics',
 'pingus', 'musescore', 'marble', 'florence', 'xinput-calibrator', 'asunder',
 'galculator', 'lxlauncher', 'menulibre', 'minitube', 'compton', 'wine', 'vlc',
-'geary')
+'geary', 'vlc', 'gcu-bin')
 
-################################################################################
-#                       IMPORTS                                                #
-################################################################################
-
-import psycopg2
-import datetime
-import os
-import re
-import json
-import sys, getopt
-import HTML
-from subprocess import call
-from cgi import escape
-
-################################################################################
-#                         HTML STUFF                                           #
-################################################################################
 
 def make_debian_links(pkg, version):
     """Return a string containing debian links for a package"""
@@ -162,7 +152,7 @@ def write_legend():
     t1.rows.append(HTML.TableRow(("Ubuntu version greater than Debian version",),
                                 bgcolor=UBU_GT_DEB_COLOR))
     t1.rows.append(HTML.TableRow(("Ubuntu version matches Debian version", ),
-                                bgcolor=UBU_EQ_DEB_COLOR))          
+                                bgcolor=UBU_EQ_DEB_COLOR))
     t1.rows.append(HTML.TableRow(("Ubuntu package missing in Debian", ),
                                 bgcolor=MIS_IN_DEB_COLOR))
 
@@ -175,6 +165,7 @@ def write_legend():
     write_to_file(str(t1) + "<br>", 'a')
     write_to_file(str(t2) + "<br>", 'a')
 
+
 def write_other_pkgs_table(title, data):
     output = "<h2>%s</h2>" % title
     table = HTML.Table(header_row=["Software", "WNPP", "Notes"])
@@ -184,15 +175,18 @@ def write_other_pkgs_table(title, data):
     output += ("<br>")
     write_to_file(output, 'a')
 
+
 def write_note(title, data):  # TODO: Improve this
     output = "<h2>%s</h2>" % title
     output += HTML.list(data)
     write_to_file(output, 'a')
 
+
 def write_to_file(text, mode):
     """Actually write text to file"""
     with open(REPORT, mode) as f:
         f.write(text)
+
 
 def write_table(title, data):
     """Write a table's items to file"""
@@ -205,6 +199,7 @@ def write_table(title, data):
     output += str(table)
     output += ("<br>")
     write_to_file(output, 'a')
+
 
 def make_row(item):
     """Return the content of a table's row"""
@@ -234,9 +229,6 @@ def make_row(item):
     return HTML.TableRow((source, ubu_version, deb_version, upstream_version,
         upstream_status, deb_links, ubu_links, comment, bugs), bgcolor)
 
-################################################################################
-#                          COMMENTS STUFF                                      #
-################################################################################
 
 def get_comments():
     """Extract the comments from file, and return a dictionary
@@ -250,6 +242,7 @@ def get_comments():
         comments = {}
     return comments
 
+
 def get_comment(package):
     comments = get_comments()
     if package in comments:
@@ -257,6 +250,7 @@ def get_comment(package):
     else:
         thecomment = ""
     return thecomment
+
 
 def remove_old_comments():
     '''Clean comments file removing package not in list anymore and old comments'''
@@ -275,6 +269,7 @@ def remove_old_comments():
 
     with open(COMMENTS_FILE, "w") as file_comments:
         json.dump(newcomments, file_comments, indent=4)
+
 
 def gen_buglink_from_comment(comment):
     """Return an HTML formatted Debian/Ubuntu bug link from comment"""
@@ -300,6 +295,7 @@ def gen_buglink_from_comment(comment):
 
     return html
 
+
 def gen_comments(package):
 # the following should work but doesn't.
 #    html = """
@@ -314,15 +310,13 @@ def gen_comments(package):
     html = "<form method=\\\"get\\\" action=\\\"addcomment.php\\\"><input type=\\\"hidden\\\" name=\\\"package\\\" value=\\\"%s\\\" /> <input type=\\\"text\\\" name=\\\"comment\\\" value=\\\"%s\\\" /> </form>" % (package, get_comment(package))
     return html
 
-################################################################################
-#                          MAIN                                                #
-################################################################################
 
 def query_udd(conn, query):
     """Actually execute a query on udd"""
     cursor = conn.cursor()
     cursor.execute(query)
     return cursor.fetchall()
+
 
 def query_other_pkgs(conn, pkg_list):
     output = []
@@ -343,6 +337,7 @@ def query_other_pkgs(conn, pkg_list):
         else:
             output.append((pkg, "", pkg_list[pkg]))
     return output
+
 
 if __name__ == "__main__":
     if '-c' in sys.argv or '--clean' in sys.argv:
