@@ -74,8 +74,8 @@ WIILDOS_SRC_PKGS_LIST = (
 'tuxmath', 'wxmaxima', 'lybniz', 'celestia', 'chemtool', 'gperiodic',
 'stellarium', 'gnome-chemistry-utils', 'gcompris', 'jclic', 'numptyphysics',
 'pingus', 'musescore', 'marble', 'florence', 'xinput-calibrator', 'asunder',
-'galculator', 'lxlauncher', 'menulibre', 'minitube', 'compton', 'wine', 'vlc',
-'geary', 'vlc')
+'galculator', 'lxlauncher', 'menulibre', 'minitube', 'compton', 'wine',
+'geary', 'vlc', 'basic256', 'cheese', 'gcu-bin', 'guvcview')
 
 
 def make_debian_links(pkg, version):
