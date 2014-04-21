@@ -12,7 +12,7 @@
  */
 
     $COMMENTS_FILE ="/home/groups/ubuntu-dev/htdocs/wiildos/comments.json";
-    $pyscript = "/srv/home/users/mapreri-guest/wiildos/wiildos.py";
+    $pyscript = "/srv/home/users/warp10/wiildos/wiildos.py";
 
     $package = $_GET['package'];
     $comment = addslashes($_GET['comment']);
